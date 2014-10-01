@@ -16,7 +16,7 @@ import java.util.Set;
 @NamedQuery(name="Bank.findAll", query="SELECT b FROM Bank b")
 public class Bank implements Serializable {
 	private static final long serialVersionUID = 1L;
-
+ 
 	@Id
 	@Column(name="IDBANK")
 	private String idbank;

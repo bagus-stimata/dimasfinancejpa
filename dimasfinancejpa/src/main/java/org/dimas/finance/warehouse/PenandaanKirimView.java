@@ -22,6 +22,7 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.Table;
+import com.vaadin.ui.Window;
 import com.vaadin.ui.Table.Align;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
@@ -44,6 +45,7 @@ public class PenandaanKirimView extends CustomComponent {
 
 	//Additional Component	
 	private TextField fieldSearchByRekap;
+	private Button btnSelectRekapNo = new Button("F");
 	private ComboBox fieldSearchComboDivisi;
 	private TextField fieldSearchByInvoice;	
 	private ComboBox fieldSearchComboTerkirim;
@@ -236,6 +238,7 @@ public class PenandaanKirimView extends CustomComponent {
 		verticalSplitPanel.setSplitPosition(85);
 		
 		layoutTop.addComponent(fieldSearchByRekap);
+		layoutTop.addComponent(btnSelectRekapNo);
 		layoutTop.addComponent(fieldSearchComboDivisi);
 		layoutTop.addComponent(fieldSearchByInvoice);	
 		layoutTop.addComponent(fieldSearchComboSalesman);
@@ -244,6 +247,7 @@ public class PenandaanKirimView extends CustomComponent {
 		layoutTop.addComponent(fieldSearchByDateInvoiceFrom);
 		layoutTop.addComponent(fieldSearchByDateInvoiceTo);
 
+		layoutTop.setComponentAlignment(btnSelectRekapNo, Alignment.BOTTOM_CENTER);
 		
 		HorizontalLayout horBut = new HorizontalLayout();
 		
@@ -539,6 +543,41 @@ public class PenandaanKirimView extends CustomComponent {
 		
 	}
 
+	private Window windowRecapSearch = new Window();	
+	
+	private WhRecapSelectModel recapSelectModel; 
+	private WhRecapSelectView recapSelectView;
+	
+	//WINDOW HEADER SELECT
+	public void buildWindowRecapSelect(){
+		
+		//Create window
+		windowRecapSearch = new Window();
+		windowRecapSearch.setModal(true);
+		windowRecapSearch.center();
+		windowRecapSearch.setStyleName("login-layout");
+		windowRecapSearch.setWidth("800px");
+		windowRecapSearch.setHeight("600px");
+		
+		//INITIAL DATA TO PASS
+		
+		recapSelectModel = new WhRecapSelectModel();
+		recapSelectView = new WhRecapSelectView(recapSelectModel);
+		
+		WhRecapSelectPresenter recapSelectPresenter = new WhRecapSelectPresenter(
+				recapSelectModel, recapSelectView);		
+		recapSelectView.setSizeFull();		
+		
+		windowRecapSearch.setContent(recapSelectView);
+		
+		getUI().addWindow(windowRecapSearch);
+		
+		
+	}
+	public void destroyWindowRecapSelect(){		
+		windowRecapSearch.close();
+	}
+	
 	
 	public PenandaanKirimModel getModel() {
 		return model;
@@ -852,7 +891,39 @@ public class PenandaanKirimView extends CustomComponent {
 	public void setFieldAmountPaySum(TextField fieldAmountPaySum) {
 		this.fieldAmountPaySum = fieldAmountPaySum;
 	}
+
+	public Button getBtnSelectRekapNo() {
+		return btnSelectRekapNo;
+	}
+
+	public void setBtnSelectRekapNo(Button btnSelectRekapNo) {
+		this.btnSelectRekapNo = btnSelectRekapNo;
+	}
+
+	public Window getWindowRecapSearch() {
+		return windowRecapSearch;
+	}
+
+	public void setWindowRecapSearch(Window windowRecapSearch) {
+		this.windowRecapSearch = windowRecapSearch;
+	}
+
+	public WhRecapSelectModel getRecapSelectModel() {
+		return recapSelectModel;
+	}
+
+	public void setRecapSelectModel(WhRecapSelectModel recapSelectModel) {
+		this.recapSelectModel = recapSelectModel;
+	}
+
+	public WhRecapSelectView getRecapSelectView() {
+		return recapSelectView;
+	}
+
+	public void setRecapSelectView(WhRecapSelectView recapSelectView) {
+		this.recapSelectView = recapSelectView;
+	}
 	
-	
+	   
 	
 }

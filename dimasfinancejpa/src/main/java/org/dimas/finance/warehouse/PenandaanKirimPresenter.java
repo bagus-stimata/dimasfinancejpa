@@ -9,6 +9,7 @@ import org.dimas.finance.model.Arinvoice;
 import org.dimas.finance.model.Arpaymentdetail;
 import org.dimas.finance.model.ArpaymentdetailPK;
 import org.dimas.finance.model.Arpaymentheader;
+import org.dimas.finance.model.Bbankheader;
 import org.dimas.finance.model.Division;
 import org.dimas.finance.model.Salesman;
 import org.dimas.finance.model.modelenum.EnumFormOperationStatus;
@@ -69,6 +70,7 @@ public class PenandaanKirimPresenter implements ClickListener, ValueChangeListen
 		view.getTable().addValueChangeListener(this);
 		view.getTable().addItemClickListener(this);
 		
+		view.getBtnSelectRekapNo().addClickListener(this);
 		// register action handler (enter and ctrl-n)
 //		view.getPanelUtama().addActionHandler(this);
 //		view.getPanelTop().addActionHandler(this);
@@ -122,6 +124,18 @@ public class PenandaanKirimPresenter implements ClickListener, ValueChangeListen
 	
 	public void initListenerSubWindow(){
 		
+	}
+	
+	public void initListenerWindowRecapSelect(){
+		ClickListener closeListener = new ClickListener() {
+			
+			@Override
+			public void buttonClick(ClickEvent event) {
+				// TODO Auto-generated method stub
+				windowRecapSelectClose();
+			}
+		};
+		view.getRecapSelectView().getBtnSelect().addClickListener(closeListener);
 	}
 	
 	public void initDisplay(){
@@ -193,6 +207,8 @@ public class PenandaanKirimPresenter implements ClickListener, ValueChangeListen
 			}			
 			
 		
+		}else if (event.getButton() == view.getBtnSelectRekapNo()){
+			windowRecapSelectShow();
 		}
 		
 		//Tidak semua akan di refresh container nya >> Jadi refresh container tidak bisa di taruh disini
@@ -215,6 +231,7 @@ public class PenandaanKirimPresenter implements ClickListener, ValueChangeListen
 		Filter filter1 = new And(new SimpleStringFilter("id.invoiceno",invoiceNo, true, false));
 		model.getTableJpaContainer().addContainerFilter(filter1);
 
+		//PARSING RECAPNO
 		String recapNo = view.getFieldSearchByRekap().getValue().toString().trim();
 		if (! recapNo.trim().equals("")){
 			Filter filter2 = new And(new SimpleStringFilter("recapno", recapNo, true, false));
@@ -606,6 +623,27 @@ public class PenandaanKirimPresenter implements ClickListener, ValueChangeListen
 		}
 	}
 
+	public void windowRecapSelectShow(){
+		view.buildWindowRecapSelect();
+		initListenerWindowRecapSelect();
+//		view.setFormButtonAndTextState();		
+	}
+	
+	public void windowRecapSelectClose(){
+		view.destroyWindowRecapSelect();
+		//Ambil data Masukin ke Kolom recap no
+		String recapCollection = "";
+		Collection itemIds = view.getRecapSelectModel().getBeanItemContainerItemHeader().getItemIds();
+		for (Object itemId: itemIds){
+			Arinvoice item = new Arinvoice();
+			item = view.getRecapSelectModel().getBeanItemContainerItemHeader().getItem(itemId).getBean();
+			if (item.getSelected().getValue()==true){
+				recapCollection += ", " + item.getRecapno();
+			}
+		}
+		
+		view.getFieldSearchByRekap().setValue(recapCollection);
+	}
 	
 	
 }

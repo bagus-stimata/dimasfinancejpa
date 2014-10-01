@@ -1,6 +1,7 @@
 package org.dimas.finance.jpa.dao;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -10,6 +11,7 @@ import javax.persistence.PersistenceException;
 import org.dimas.finance.jpa.dao.generic.GenericJpaServiceImpl;
 import org.dimas.finance.model.Arinvoice;
 import org.dimas.finance.model.ArinvoicePK;
+import org.dimas.finance.model.Bbankheader;
 import org.eclipse.persistence.config.HintValues;
 import org.eclipse.persistence.config.QueryHints;
 
@@ -92,6 +94,92 @@ public class ArInvoiceJpaServiceImpl extends GenericJpaServiceImpl<Arinvoice, Se
 	            em.close();
 	        }   
 	    
+	}
+
+	@Override
+	public List<Arinvoice> findAllForRecapSelect(String recapno, String division) {
+		// TODO Auto-generated method stub
+	       EntityManager em = getFactory().createEntityManager();
+	        try {
+	        	
+	            em.getTransaction().begin();
+	            String query = "SELECT a From Arinvoice a "
+	            		+ " WHERE "
+	            		+ " a.recapno LIKE :recapno AND a.id.division LIKE :division GROUP BY a.recapno";
+	            
+	            List<Arinvoice> list = em.createQuery(query)
+	            		.setParameter("recapno", recapno)
+	            		.setParameter("division", division)
+	            		.setHint(QueryHints.REFRESH, HintValues.TRUE)
+	            		.getResultList();
+	            
+	            em.getTransaction().commit();
+	            return list;
+	        } catch (PersistenceException exception) {
+	            em.getTransaction().rollback();
+	            throw exception;
+	        } finally {
+	            em.close();
+	        }    
+	}
+
+	@Override
+	public List<Arinvoice> findAllForRecapSelect(String recapno,
+			String division, Date invoiceFromAndTo) {
+	       EntityManager em = getFactory().createEntityManager();
+	        try {
+	        	
+	            em.getTransaction().begin();
+	            String query = "SELECT a From Arinvoice a "
+	            		+ " WHERE "
+	            		+ " a.recapno LIKE :recapno AND a.id.division LIKE :division "
+	            		+ " AND a.invoicedate = :invoicedateFormTo";
+	            
+	            List<Arinvoice> list = em.createQuery(query)
+	            		.setParameter("recapno", recapno)
+	            		.setParameter("division", division)
+	            		.setParameter("invoicedateFormTo", invoiceFromAndTo)
+	            		.setHint(QueryHints.REFRESH, HintValues.TRUE)
+	            		.getResultList();
+	            
+	            em.getTransaction().commit();
+	            return list;
+	        } catch (PersistenceException exception) {
+	            em.getTransaction().rollback();
+	            throw exception;
+	        } finally {
+	            em.close();
+	        }    
+	}
+
+	@Override
+	public List<Arinvoice> findAllForRecapSelect(String recapno,
+			String division, Date invoiceDateFrom, Date invoiceDateTo) {
+	       EntityManager em = getFactory().createEntityManager();
+	        try {
+	        	
+	            em.getTransaction().begin();
+	            String query = "SELECT a From Arinvoice a "
+	            		+ " WHERE "
+	            		+ " a.recapno LIKE :recapno AND a.id.division LIKE :division "
+	            		+ " AND a.invoicedate >= :invoicedateFrom AND a.invoicedate <= :invoicedateTo";
+	            
+	            List<Arinvoice> list = em.createQuery(query)
+	            		.setParameter("recapno", recapno)
+	            		.setParameter("division", division)
+	            		.setParameter("invoicedateFrom", invoiceDateFrom)
+	            		.setParameter("invoicedateTo", invoiceDateTo)
+	            		.setHint(QueryHints.REFRESH, HintValues.TRUE)
+	            		.getResultList();
+	            
+	            em.getTransaction().commit();
+	            return list;
+	        } catch (PersistenceException exception) {
+	            em.getTransaction().rollback();
+	            throw exception;
+	        } finally {
+	            em.close();
+	        }    
 	}
 	
 	
