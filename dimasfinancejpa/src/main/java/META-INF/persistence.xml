@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="2.1" xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd">
+
+    <persistence-unit name="financePU" transaction-type="RESOURCE_LOCAL">
+    	<class>org.dimas.finance.model.Account</class>
+    	<class>org.dimas.finance.model.Accountbalance</class>
+    	<class>org.dimas.finance.model.AccountbalancePK</class>
+    	<class>org.dimas.finance.model.Accountgroup</class>
+    	<class>org.dimas.finance.model.Accountgroupreport</class>
+    	<class>org.dimas.finance.model.Apheader</class>
+    	<class>org.dimas.finance.model.Area</class>
+    	<class>org.dimas.finance.model.Arinvoice</class>
+    	<class>org.dimas.finance.model.ArinvoicePK</class>
+    	<class>org.dimas.finance.model.Arpaymentdetail</class>
+    	<class>org.dimas.finance.model.ArpaymentdetailPK</class>
+    	<class>org.dimas.finance.model.Arpaymentheader</class>
+    	<class>org.dimas.finance.model.Arretur</class>
+    	<class>org.dimas.finance.model.ArreturPK</class>
+    	<class>org.dimas.finance.model.Bank</class>
+    	<class>org.dimas.finance.model.Bbankdetail</class>
+    	<class>org.dimas.finance.model.BbankdetailPK</class>
+    	<class>org.dimas.finance.model.Bbankheader</class>
+    	<class>org.dimas.finance.model.BbankheaderPK</class>
+    	<class>org.dimas.finance.model.Bkbdetail</class>
+    	<class>org.dimas.finance.model.BkbdetailPK</class>
+    	<class>org.dimas.finance.model.Bkbheader</class>
+    	<class>org.dimas.finance.model.BkbheaderPK</class>
+    	<class>org.dimas.finance.model.Bkkdetail</class>
+    	<class>org.dimas.finance.model.BkkdetailPK</class>
+    	<class>org.dimas.finance.model.Bkkheader</class>
+    	<class>org.dimas.finance.model.BkkheaderPK</class>
+    	<class>org.dimas.finance.model.Bukugiro</class>
+    	<class>org.dimas.finance.model.BukugiroPK</class>
+    	<class>org.dimas.finance.model.Bukutransfer</class>
+    	<class>org.dimas.finance.model.BukutransferPK</class>
+    	<class>org.dimas.finance.model.Configscyllatofinance</class>
+    	<class>org.dimas.finance.model.Customer</class>
+    	<class>org.dimas.finance.model.CustomerPK</class>
+    	<class>org.dimas.finance.model.Departement</class>
+    	<class>org.dimas.finance.model.Division</class>
+    	<class>org.dimas.finance.model.Journaldetail</class>
+    	<class>org.dimas.finance.model.Journalheader</class>
+    	<class>org.dimas.finance.model.Region</class>
+    	<class>org.dimas.finance.model.Salesman</class>
+    	<class>org.dimas.finance.model.SalesmanPK</class>
+    	<class>org.dimas.finance.model.Sequence</class>
+    	<class>org.dimas.finance.model.User</class>
+    	<class>org.dimas.finance.model.Vendor</class>
+<!-- 		<class>org.dimas.finance.model.ApDetail</class> -->
+<!-- 		<class>org.dimas.finance.model.ArDetail</class> -->
+    	<class>org.dimas.finance.model.Sysvar</class>
+    	<class>org.dimas.finance.model.SysvarPK</class>
+    	<class>org.dimas.finance.model.SysCalender</class>
+    	<class>org.dimas.finance.model.SysCalenderPK</class>    	
+    	<class>org.dimas.finance.model.UserLog</class>
+
+	   	<class>org.dimas.finance.model.Modul</class>
+	   	<class>org.dimas.finance.model.ModulTempHeader</class>
+	    <class>org.dimas.finance.model.ModulTempDetail</class>
+	    <class>org.dimas.finance.model.ModulTempDetailPK</class>
+	    
+	    <class>org.dimas.finance.model.Bbankbalance</class>
+   	    <class>org.dimas.finance.model.BbankbalancePK</class>
+   	    <class>org.dimas.finance.model.Bkbbalance</class>
+   	    <class>org.dimas.finance.model.BkbbalancePK</class>
+   	    <class>org.dimas.finance.model.Bkkbalance</class>
+   	    <class>org.dimas.finance.model.BkkbalancePK</class>
+   	    
+   	    <class>org.dimas.finance.model.Bkbtranstype</class>
+   	    <class>org.dimas.finance.model.Bkktranstype</class>
+   	    <class>org.dimas.finance.model.Bbanktranstype</class>
+   	    	    	    	    	    	    	    
+      									
+		<properties>
+              	<property name="javax.persistence.jdbc.driver" value="com.mysql.jdbc.Driver" />
+              	<property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/finance_db" />
+              	<property name="javax.persistence.jdbc.user" value="root" />
+              	<property name="javax.persistence.jdbc.password" value="hacker" />
+			<property name="eclipselink.ddl-generation" value="create-tables" />
+		<!-- 				
+			<property name="eclipselink.ddl-generation" value="drop-and-create-tables" />
+		-->								
+        </properties>								
+        
+	</persistence-unit>
+
+</persistence>
