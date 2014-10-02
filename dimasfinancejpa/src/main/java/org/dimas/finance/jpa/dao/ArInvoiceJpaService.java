@@ -13,9 +13,13 @@ public interface ArInvoiceJpaService extends GenericJpaService<Arinvoice, Serial
 	public List<Arinvoice> findAllReturBelumLunas();
 	public List<Arinvoice> findAllReturBelumLunas(Arinvoice exceptRetur);
 	public Arinvoice findByPk(ArinvoicePK pk);
-	public List<Arinvoice> findAllForRecapSelect(String recapno, String division);
-	public List<Arinvoice> findAllForRecapSelect(String recapno, String division, Date invoiceDateFromAndTo);
-	public List<Arinvoice> findAllForRecapSelect(String recapno, String division, Date invoiceDateFrom, Date invoiceDateTo);
+	public List<Arinvoice> findAllForRecapSelectWh(String recapno, String division);
+	public List<Arinvoice> findAllForRecapSelectWh(String recapno, String division, Date invoiceDateFromAndTo);
+	public List<Arinvoice> findAllForRecapSelectWh(String recapno, String division, Date invoiceDateFrom, Date invoiceDateTo);
+
+	public List<Arinvoice> findAllForRecapSelectArTOTunai(String recapno, String division);
+	public List<Arinvoice> findAllForRecapSelectArTOTunai(String recapno, String division, Date invoiceDateFromAndTo);
+	public List<Arinvoice> findAllForRecapSelectArTOTunai(String recapno, String division, Date invoiceDateFrom, Date invoiceDateTo);
 	
 	
 }

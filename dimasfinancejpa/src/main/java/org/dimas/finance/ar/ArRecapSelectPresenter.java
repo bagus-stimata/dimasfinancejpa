@@ -1,4 +1,4 @@
-package org.dimas.finance.warehouse;
+package org.dimas.finance.ar;
 
 import java.util.Collection;
 import java.util.Date;
@@ -23,11 +23,11 @@ import com.vaadin.ui.Button.ClickListener;
 import com.vaadin.ui.Table.HeaderClickEvent;
 import com.vaadin.ui.Table.HeaderClickListener;
 
-public class WhRecapSelectPresenter implements ClickListener, ValueChangeListener{
-	private WhRecapSelectModel model;
-	private WhRecapSelectView view;
+public class ArRecapSelectPresenter implements ClickListener, ValueChangeListener{
+	private ArRecapSelectModel model;
+	private ArRecapSelectView view;
 	
-	public WhRecapSelectPresenter(WhRecapSelectModel model, WhRecapSelectView view){
+	public ArRecapSelectPresenter(ArRecapSelectModel model, ArRecapSelectView view){
 		this.model = model;
 		this.view = view;
 		
@@ -144,12 +144,12 @@ public class WhRecapSelectPresenter implements ClickListener, ValueChangeListene
 		} catch(Exception ex){}
 		
 		if (tglTransFromLong ==0 & tglTransToLong ==0){ 
-			model.getBeanItemContainerItemHeader().addAll(model.getArInvoiceService().findAllForRecapSelectWh("%" + theId + "%", "%" + strDivision + "%" ));
+			model.getBeanItemContainerItemHeader().addAll(model.getArInvoiceService().findAllForRecapSelectArTOTunai("%" + theId + "%", "%" + strDivision + "%" ));
 		} else if (tglTransFromLong !=0 & tglTransToLong==0){
-			model.getBeanItemContainerItemHeader().addAll(model.getArInvoiceService().findAllForRecapSelectWh("%" + theId + "%", "%" + strDivision + "%" ,
+			model.getBeanItemContainerItemHeader().addAll(model.getArInvoiceService().findAllForRecapSelectArTOTunai("%" + theId + "%", "%" + strDivision + "%" ,
 					new Date(tglTransFromLong)));			
 		}else{
-			model.getBeanItemContainerItemHeader().addAll(model.getArInvoiceService().findAllForRecapSelectWh("%" + theId + "%", "%" + strDivision + "%" ,
+			model.getBeanItemContainerItemHeader().addAll(model.getArInvoiceService().findAllForRecapSelectArTOTunai("%" + theId + "%", "%" + strDivision + "%" ,
 					new Date(tglTransFromLong), new Date(tglTransToLong)));						
 		}
 		view.getTable().refreshRowCache();

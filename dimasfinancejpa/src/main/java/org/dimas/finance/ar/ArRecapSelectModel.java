@@ -1,4 +1,4 @@
-package org.dimas.finance.warehouse;
+package org.dimas.finance.ar;
 
 import org.dimas.finance.jpa.dao.ArInvoiceJpaService;
 import org.dimas.finance.jpa.dao.ArInvoiceJpaServiceImpl;
@@ -36,7 +36,7 @@ import com.vaadin.addon.jpacontainer.JPAContainerFactory;
 import com.vaadin.data.fieldgroup.BeanFieldGroup;
 import com.vaadin.data.util.BeanItemContainer;
 
-public class WhRecapSelectModel {
+public class ArRecapSelectModel {
 	//1. DAO SERVICE
 		private ArInvoiceJpaService arInvoiceService;
 		private SysvarJpaService sysvarService;
@@ -59,7 +59,7 @@ public class WhRecapSelectModel {
 		//CHECK BOX BUAT TABLE PADA HEADER
 		private boolean selectAllInvoice;
 	
-		public WhRecapSelectModel(){
+		public ArRecapSelectModel(){
 			initVariable();
 			initVariableData();
 			
@@ -89,7 +89,7 @@ public class WhRecapSelectModel {
 			beanItemContainerItemHeader.removeAllContainerFilters();
 			beanItemContainerItemHeader.removeAllItems();
 			
-			beanItemContainerItemHeader.addAll(arInvoiceService.findAllForRecapSelectWh("%", "%"));
+			beanItemContainerItemHeader.addAll(arInvoiceService.findAllForRecapSelectArTOTunai("%", "%"));
 			beanItemContainerDivision.addAll(divisionService.findAll());
 		}
 

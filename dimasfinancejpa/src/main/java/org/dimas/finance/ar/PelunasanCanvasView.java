@@ -8,6 +8,9 @@ import java.util.Date;
 import org.dimas.finance.model.Arinvoice;
 import org.dimas.finance.model.modelenum.EnumFormOperationStatus;
 import org.dimas.finance.util.HelpManager;
+import org.dimas.finance.warehouse.WhRecapSelectModel;
+import org.dimas.finance.warehouse.WhRecapSelectPresenter;
+import org.dimas.finance.warehouse.WhRecapSelectView;
 
 import com.vaadin.addon.jpacontainer.fieldfactory.FieldFactory;
 import com.vaadin.data.Property;
@@ -22,6 +25,7 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.Table;
+import com.vaadin.ui.Window;
 import com.vaadin.ui.Table.Align;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
@@ -44,6 +48,7 @@ public class PelunasanCanvasView extends CustomComponent {
 
 	//Additional Component	
 	private TextField fieldSearchByRekap;
+	private Button btnSelectRekapNo = new Button("F");	
 	private ComboBox fieldSearchComboDivisi;
 	private TextField fieldSearchByInvoice;	
 	private ComboBox fieldSearchComboLunas;
@@ -234,6 +239,7 @@ public class PelunasanCanvasView extends CustomComponent {
 		verticalSplitPanel.setSplitPosition(85);
 		
 		layoutTop.addComponent(fieldSearchByRekap);
+		layoutTop.addComponent(btnSelectRekapNo);
 		layoutTop.addComponent(fieldSearchComboDivisi);
 		layoutTop.addComponent(fieldSearchByInvoice);	
 		layoutTop.addComponent(fieldSearchComboSalesman);
@@ -242,6 +248,7 @@ public class PelunasanCanvasView extends CustomComponent {
 		layoutTop.addComponent(fieldSearchByDateInvoiceFrom);
 		layoutTop.addComponent(fieldSearchByDateInvoiceTo);
 
+		layoutTop.setComponentAlignment(btnSelectRekapNo, Alignment.BOTTOM_CENTER);
 		
 		HorizontalLayout horBut = new HorizontalLayout();
 		
@@ -291,6 +298,8 @@ public class PelunasanCanvasView extends CustomComponent {
 		setCompositionRoot(panelUtama);	
 		
 		content.setExpandRatio(verticalSplitPanel, 1);
+		
+		btnSelectRekapNo.setVisible(false);
 		
 	}
 	public void setVisibleTableProperties(Object... tablePropertyIds) {
@@ -524,6 +533,41 @@ public class PelunasanCanvasView extends CustomComponent {
 		
 	}
 
+	private Window windowRecapSearch = new Window();	
+	
+	private ArRecapSelectModel recapSelectModel; 
+	private ArRecapSelectView recapSelectView;
+	
+	//WINDOW HEADER SELECT
+	public void buildWindowRecapSelect(){
+		
+		//Create window
+		windowRecapSearch = new Window();
+		windowRecapSearch.setModal(true);
+		windowRecapSearch.center();
+		windowRecapSearch.setStyleName("login-layout");
+		windowRecapSearch.setWidth("800px");
+		windowRecapSearch.setHeight("600px");
+		
+		//INITIAL DATA TO PASS
+		
+		recapSelectModel = new ArRecapSelectModel();
+		recapSelectView = new ArRecapSelectView(recapSelectModel);
+		
+		ArRecapSelectPresenter recapSelectPresenter = new ArRecapSelectPresenter(
+				recapSelectModel, recapSelectView);		
+		recapSelectView.setSizeFull();		
+		
+		windowRecapSearch.setContent(recapSelectView);
+		
+		getUI().addWindow(windowRecapSearch);
+		
+		
+	}
+	public void destroyWindowRecapSelect(){		
+		windowRecapSearch.close();
+	}
+	
 	
 	
 	public PelunasanCanvasModel getModel() {
@@ -760,6 +804,30 @@ public class PelunasanCanvasView extends CustomComponent {
 	}
 	public void setFieldAmountPaySum(TextField fieldAmountPaySum) {
 		this.fieldAmountPaySum = fieldAmountPaySum;
+	}
+	public Button getBtnSelectRekapNo() {
+		return btnSelectRekapNo;
+	}
+	public void setBtnSelectRekapNo(Button btnSelectRekapNo) {
+		this.btnSelectRekapNo = btnSelectRekapNo;
+	}
+	public Window getWindowRecapSearch() {
+		return windowRecapSearch;
+	}
+	public void setWindowRecapSearch(Window windowRecapSearch) {
+		this.windowRecapSearch = windowRecapSearch;
+	}
+	public ArRecapSelectModel getRecapSelectModel() {
+		return recapSelectModel;
+	}
+	public void setRecapSelectModel(ArRecapSelectModel recapSelectModel) {
+		this.recapSelectModel = recapSelectModel;
+	}
+	public ArRecapSelectView getRecapSelectView() {
+		return recapSelectView;
+	}
+	public void setRecapSelectView(ArRecapSelectView recapSelectView) {
+		this.recapSelectView = recapSelectView;
 	}
 
 	

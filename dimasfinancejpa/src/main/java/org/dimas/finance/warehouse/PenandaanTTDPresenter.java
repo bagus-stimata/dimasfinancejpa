@@ -26,6 +26,8 @@ import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.filter.And;
 import com.vaadin.data.util.filter.Compare;
+import com.vaadin.data.util.filter.Like;
+import com.vaadin.data.util.filter.Or;
 import com.vaadin.data.util.filter.SimpleStringFilter;
 import com.vaadin.event.Action;
 import com.vaadin.event.Action.Handler;
@@ -71,6 +73,8 @@ public class PenandaanTTDPresenter implements ClickListener, ValueChangeListener
 		
 		view.getTable().addValueChangeListener(this);
 		view.getTable().addItemClickListener(this);
+		
+		view.getBtnSelectRekapNo().addClickListener(this);
 		
 		// register action handler (enter and ctrl-n)
 //		view.getPanelUtama().addActionHandler(this);
@@ -126,6 +130,17 @@ public class PenandaanTTDPresenter implements ClickListener, ValueChangeListener
 	public void initListenerSubWindow(){
 		
 	}
+	public void initListenerWindowRecapSelect(){
+		ClickListener closeListener = new ClickListener() {
+			
+			@Override
+			public void buttonClick(ClickEvent event) {
+				// TODO Auto-generated method stub
+				windowRecapSelectClose();
+			}
+		};
+		view.getRecapSelectView().getBtnSelect().addClickListener(closeListener);
+	}
 	
 	public void initDisplay(){
 		//1. Table
@@ -157,24 +172,22 @@ public class PenandaanTTDPresenter implements ClickListener, ValueChangeListener
 		} else if (event.getButton() == view.getBtnHelp()){
 			helpForm();
 		} else if (event.getButton() == view.getBtnSetTertunda()){			
-			if (itemTableSelected != null){			
-				 final ConfirmDialog d = ConfirmDialog.show(view.getUI(),"Konfirmasi Pengiriman", "CHECK ULANG SEBELUM MENANDAI TERTUNDA, "
-				 		+ " YAKIN TANDAI TERTUNDA? ", 
-						 "OK Tertunda", "Cancel", konfirmDialogTertundaListener);
-				 
-				   final ShortcutListener enter = new ShortcutListener("Oke",
-			                KeyCode.ENTER, null) {
-			            @Override
-			            public void handleAction(Object sender, Object target) {
-			            	d.close();
-			            }
-			        };
-				
-				 d.setStyleName("dialog");
-				 d.getOkButton().setStyleName("small");
-				 d.getCancelButton().setStyleName("small");
-				 d.focus();
-			}			
+			 final ConfirmDialog d = ConfirmDialog.show(view.getUI(),"Konfirmasi Pengiriman", "CHECK ULANG SEBELUM MENANDAI TERTUNDA, "
+			 		+ " YAKIN TANDAI TERTUNDA? ", 
+					 "OK Tertunda", "Cancel", konfirmDialogTertundaListener);
+			 
+			   final ShortcutListener enter = new ShortcutListener("Oke",
+		                KeyCode.ENTER, null) {
+		            @Override
+		            public void handleAction(Object sender, Object target) {
+		            	d.close();
+		            }
+		        };
+			
+			 d.setStyleName("dialog");
+			 d.getOkButton().setStyleName("small");
+			 d.getCancelButton().setStyleName("small");
+			 d.focus();
 			
 		} else if (event.getButton() == view.getBtnBatalTertunda()){
 			if (itemTableSelected != null){			
@@ -195,8 +208,10 @@ public class PenandaanTTDPresenter implements ClickListener, ValueChangeListener
 				 d.focus();
 			}			
 			
-		
+		} else if (event.getButton() == view.getBtnSelectRekapNo()){
+			windowRecapSelectShow();
 		}
+
 		
 		//Tidak semua akan di refresh container nya >> Jadi refresh container tidak bisa di taruh disini
 		
@@ -218,11 +233,23 @@ public class PenandaanTTDPresenter implements ClickListener, ValueChangeListener
 		Filter filter1 = new And(new SimpleStringFilter("id.invoiceno",invoiceNo, true, false));
 		model.getTableJpaContainer().addContainerFilter(filter1);
 
+		//PARSING RECAPNO
+//		Filter[] filterRecaps = new Filter[2];			
+//		filterRecaps[0] = new And(new Like("recapno", "24288"));
+//		filterRecaps[1] = new And(new Like("recapno", "24287"));
 		String recapNo = view.getFieldSearchByRekap().getValue().toString().trim();
 		if (! recapNo.trim().equals("")){
-			Filter filter2 = new And(new SimpleStringFilter("recapno", recapNo, true, false));
+			String [] data = recapNo.split("\\,");			
+			Filter[] filterRecaps = new Filter[data.length];						
+			for (int i=0; i<data.length; i++){			
+				filterRecaps[i] = new And(new Like("recapno", data[i].trim()));
+			}
+			
+			Filter filter2 = new Or(filterRecaps);
 			model.getTableJpaContainer().addContainerFilter(filter2);
+			
 		}
+
 		
 		//JIKA TIDAK DIPILIH YA KOSONG
 		String strDivision="";
@@ -351,19 +378,30 @@ public class PenandaanTTDPresenter implements ClickListener, ValueChangeListener
 
 				if (item.getSelected().getValue()==true && item.isLunas() == false ){
 					
-					//UPDATE INVOICE
-					item.setTertundacounter(item.getTertundacounter()+1);
+					//UPDATE INVOICE PENAMBAHAN TANGGAL TERTUNDA TIDAK BOLEH MELEBIHI TANGGAL TRANSAKSI + 1
+					
+					Date tglTransaksiBerjalan = 
+							model.getManagerTransaksi().getCurrentTanggalTransaksiBerjalan(item.getDivisionBean());
+					Calendar calTomorrow = Calendar.getInstance();
+					calTomorrow.setTime(tglTransaksiBerjalan);
+					calTomorrow.add(Calendar.DATE, 1);
 					
 					Calendar cal = Calendar.getInstance();
 					cal.setTime(item.getActualduedate());
 					cal.add(Calendar.DATE, 1);
-					item.setActualduedate(cal.getTime());
 					
-					model.getArInvoiceService().updateObject(item);
-					
-					nomorUrut +=1;
-					//REFRESH SATU PERSATU
-					listObject.add(itemId);
+					if ( item.getActualduedate().getTime() <= calTomorrow.getTime().getTime()) {
+						
+						item.setActualduedate(cal.getTime());						
+						item.setTertundacounter(item.getTertundacounter()+1);
+						
+						model.getArInvoiceService().updateObject(item);
+						
+						nomorUrut +=1;
+						//REFRESH SATU PERSATU
+						listObject.add(itemId);
+					}
+						
 					
 				}
 			
@@ -401,20 +439,27 @@ public class PenandaanTTDPresenter implements ClickListener, ValueChangeListener
 
 				if (item.getSelected().getValue()==true && item.isLunas() == false ){
 					
+					Date tglTransaksiBerjalan = 
+							model.getManagerTransaksi().getCurrentTanggalTransaksiBerjalan(item.getDivisionBean());
 					//UPDATE INVOICE
 					if (item.getTertundacounter() > 0){
-						item.setTertundacounter(item.getTertundacounter()-1);
 						
 						Calendar cal = Calendar.getInstance();
 						cal.setTime(item.getActualduedate());
 						cal.add(Calendar.DATE, -1);
-						item.setActualduedate(cal.getTime());
 						
-						model.getArInvoiceService().updateObject(item);
+						if ( item.getActualduedate().getTime() > tglTransaksiBerjalan.getTime()) {						
+
+							item.setActualduedate(cal.getTime());
+							item.setTertundacounter(item.getTertundacounter()-1);
+
+							model.getArInvoiceService().updateObject(item);
+							
+							nomorUrut +=1;
+							//REFRESH SATU PERSATU
+							listObject.add(itemId);
+						}
 						
-						nomorUrut +=1;
-						//REFRESH SATU PERSATU
-						listObject.add(itemId);
 					}
 					
 				}
@@ -626,6 +671,27 @@ public class PenandaanTTDPresenter implements ClickListener, ValueChangeListener
 		}
 	}
 
+	public void windowRecapSelectShow(){
+		view.buildWindowRecapSelect();
+		initListenerWindowRecapSelect();
+//		view.setFormButtonAndTextState();		
+	}
+	
+	public void windowRecapSelectClose(){
+		view.destroyWindowRecapSelect();
+		//Ambil data Masukin ke Kolom recap no
+		String recapCollection = "";
+		Collection itemIds = view.getRecapSelectModel().getBeanItemContainerItemHeader().getItemIds();
+		for (Object itemId: itemIds){
+			Arinvoice item = new Arinvoice();
+			item = view.getRecapSelectModel().getBeanItemContainerItemHeader().getItem(itemId).getBean();
+			if (item.getSelected().getValue()==true){
+				recapCollection += item.getRecapno() + ", " ;
+			}
+		}
+		
+		view.getFieldSearchByRekap().setValue(recapCollection);
+	}
 	
 	
 }

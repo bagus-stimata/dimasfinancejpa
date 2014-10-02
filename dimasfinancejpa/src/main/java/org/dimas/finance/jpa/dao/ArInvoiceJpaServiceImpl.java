@@ -97,7 +97,7 @@ public class ArInvoiceJpaServiceImpl extends GenericJpaServiceImpl<Arinvoice, Se
 	}
 
 	@Override
-	public List<Arinvoice> findAllForRecapSelect(String recapno, String division) {
+	public List<Arinvoice> findAllForRecapSelectWh(String recapno, String division) {
 		// TODO Auto-generated method stub
 	       EntityManager em = getFactory().createEntityManager();
 	        try {
@@ -105,7 +105,8 @@ public class ArInvoiceJpaServiceImpl extends GenericJpaServiceImpl<Arinvoice, Se
 	            em.getTransaction().begin();
 	            String query = "SELECT a From Arinvoice a "
 	            		+ " WHERE "
-	            		+ " a.recapno LIKE :recapno AND a.id.division LIKE :division GROUP BY a.recapno";
+	            		+ " a.recapno LIKE :recapno AND a.id.division LIKE :division AND a.terkirim = false "
+	            		+ " GROUP BY a.recapno";
 	            
 	            List<Arinvoice> list = em.createQuery(query)
 	            		.setParameter("recapno", recapno)
@@ -124,7 +125,7 @@ public class ArInvoiceJpaServiceImpl extends GenericJpaServiceImpl<Arinvoice, Se
 	}
 
 	@Override
-	public List<Arinvoice> findAllForRecapSelect(String recapno,
+	public List<Arinvoice> findAllForRecapSelectWh(String recapno,
 			String division, Date invoiceFromAndTo) {
 	       EntityManager em = getFactory().createEntityManager();
 	        try {
@@ -133,7 +134,8 @@ public class ArInvoiceJpaServiceImpl extends GenericJpaServiceImpl<Arinvoice, Se
 	            String query = "SELECT a From Arinvoice a "
 	            		+ " WHERE "
 	            		+ " a.recapno LIKE :recapno AND a.id.division LIKE :division "
-	            		+ " AND a.invoicedate = :invoicedateFormTo";
+	            		+ " AND a.invoicedate = :invoicedateFormTo AND a.terkirim = false"
+	            		+ " GROUP BY a.recapno";
 	            
 	            List<Arinvoice> list = em.createQuery(query)
 	            		.setParameter("recapno", recapno)
@@ -153,7 +155,7 @@ public class ArInvoiceJpaServiceImpl extends GenericJpaServiceImpl<Arinvoice, Se
 	}
 
 	@Override
-	public List<Arinvoice> findAllForRecapSelect(String recapno,
+	public List<Arinvoice> findAllForRecapSelectWh(String recapno,
 			String division, Date invoiceDateFrom, Date invoiceDateTo) {
 	       EntityManager em = getFactory().createEntityManager();
 	        try {
@@ -162,7 +164,100 @@ public class ArInvoiceJpaServiceImpl extends GenericJpaServiceImpl<Arinvoice, Se
 	            String query = "SELECT a From Arinvoice a "
 	            		+ " WHERE "
 	            		+ " a.recapno LIKE :recapno AND a.id.division LIKE :division "
-	            		+ " AND a.invoicedate >= :invoicedateFrom AND a.invoicedate <= :invoicedateTo";
+	            		+ " AND a.invoicedate >= :invoicedateFrom AND a.invoicedate <= :invoicedateTo  AND a.terkirim = false"
+	            		+ " GROUP BY a.recapno";
+	            
+	            List<Arinvoice> list = em.createQuery(query)
+	            		.setParameter("recapno", recapno)
+	            		.setParameter("division", division)
+	            		.setParameter("invoicedateFrom", invoiceDateFrom)
+	            		.setParameter("invoicedateTo", invoiceDateTo)
+	            		.setHint(QueryHints.REFRESH, HintValues.TRUE)
+	            		.getResultList();
+	            
+	            em.getTransaction().commit();
+	            return list;
+	        } catch (PersistenceException exception) {
+	            em.getTransaction().rollback();
+	            throw exception;
+	        } finally {
+	            em.close();
+	        }    
+	}
+	
+	@Override
+	public List<Arinvoice> findAllForRecapSelectArTOTunai(String recapno, String division) {
+		// TODO Auto-generated method stub
+	       EntityManager em = getFactory().createEntityManager();
+	        try {
+	        	
+	            em.getTransaction().begin();
+	            String query = "SELECT a From Arinvoice a "
+	            		+ " WHERE "
+	            		+ " a.recapno LIKE :recapno AND a.id.division LIKE :division"
+	            		+ " AND a.lunas = false AND a.term = 1 AND a.tipejual LIKE 'TO'  "
+	            		+ " GROUP BY a.recapno";
+	            
+	            List<Arinvoice> list = em.createQuery(query)
+	            		.setParameter("recapno", recapno)
+	            		.setParameter("division", division)
+	            		.setHint(QueryHints.REFRESH, HintValues.TRUE)
+	            		.getResultList();
+	            
+	            em.getTransaction().commit();
+	            return list;
+	        } catch (PersistenceException exception) {
+	            em.getTransaction().rollback();
+	            throw exception;
+	        } finally {
+	            em.close();
+	        }    
+	}
+
+	@Override
+	public List<Arinvoice> findAllForRecapSelectArTOTunai(String recapno,
+			String division, Date invoiceFromAndTo) {
+	       EntityManager em = getFactory().createEntityManager();
+	        try {
+	        	
+	            em.getTransaction().begin();
+	            String query = "SELECT a From Arinvoice a "
+	            		+ " WHERE "
+	            		+ " a.recapno LIKE :recapno AND a.id.division LIKE :division "
+	            		+ " AND a.invoicedate = :invoicedateFormTo AND a.lunas = false"
+	            		+ " AND  a.term = 1 AND a.tipejual LIKE 'TO'  "
+	            		+ " GROUP BY a.recapno";
+	            
+	            List<Arinvoice> list = em.createQuery(query)
+	            		.setParameter("recapno", recapno)
+	            		.setParameter("division", division)
+	            		.setParameter("invoicedateFormTo", invoiceFromAndTo)
+	            		.setHint(QueryHints.REFRESH, HintValues.TRUE)
+	            		.getResultList();
+	            
+	            em.getTransaction().commit();
+	            return list;
+	        } catch (PersistenceException exception) {
+	            em.getTransaction().rollback();
+	            throw exception;
+	        } finally {
+	            em.close();
+	        }    
+	}
+
+	@Override
+	public List<Arinvoice> findAllForRecapSelectArTOTunai(String recapno,
+			String division, Date invoiceDateFrom, Date invoiceDateTo) {
+	       EntityManager em = getFactory().createEntityManager();
+	        try {
+	        	
+	            em.getTransaction().begin();
+	            String query = "SELECT a From Arinvoice a "
+	            		+ " WHERE "
+	            		+ " a.recapno LIKE :recapno AND a.id.division LIKE :division "
+	            		+ " AND a.invoicedate >= :invoicedateFrom AND a.invoicedate <= :invoicedateTo "
+	            		+ " AND a.lunas = false AND a.term = 1 AND a.tipejual LIKE 'TO' "
+	            		+ " GROUP BY a.recapno";
 	            
 	            List<Arinvoice> list = em.createQuery(query)
 	            		.setParameter("recapno", recapno)

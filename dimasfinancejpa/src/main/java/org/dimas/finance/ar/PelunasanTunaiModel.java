@@ -185,13 +185,13 @@ public class PelunasanTunaiModel implements Serializable{
 	public void setFilterDefaultJpaContainer(){
 		//SELALU TUNAI
 		//CANVAS SELALU TUNAI
-		Filter filter =  new SimpleStringFilter("tunaikredit","T", true, false);
-		getTableJpaContainer().addContainerFilter(filter);
+		//TUNAI KREDIT TIDAK VALID
+//		Filter filter =  new SimpleStringFilter("tunaikredit","T", true, false);
+//		getTableJpaContainer().addContainerFilter(filter);
 		
-//		Filter filter01 = new Or(new IsNull("tunaikredit"));
-//		getTableJpaContainer().addContainerFilter(filter01);
-		
-		
+		Filter filter01 =  new SimpleStringFilter("tipejual","TO", true, false);
+		getTableJpaContainer().addContainerFilter(filter01);
+				
 		Filter filter02 = new Or(new Compare.Equal("term", 1)); 
 		getTableJpaContainer().addContainerFilter(filter02);
 		

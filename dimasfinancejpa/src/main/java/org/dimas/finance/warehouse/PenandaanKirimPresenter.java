@@ -24,6 +24,8 @@ import com.vaadin.data.Property.ValueChangeEvent;
 import com.vaadin.data.Property.ValueChangeListener;
 import com.vaadin.data.util.filter.And;
 import com.vaadin.data.util.filter.Compare;
+import com.vaadin.data.util.filter.Like;
+import com.vaadin.data.util.filter.Or;
 import com.vaadin.data.util.filter.SimpleStringFilter;
 import com.vaadin.event.Action;
 import com.vaadin.event.Action.Handler;
@@ -168,24 +170,22 @@ public class PenandaanKirimPresenter implements ClickListener, ValueChangeListen
 		} else if (event.getButton() == view.getBtnHelp()){
 			helpForm();
 		} else if (event.getButton() == view.getBtnSetKirim()){			
-			if (itemTableSelected != null){			
-				 final ConfirmDialog d = ConfirmDialog.show(view.getUI(),"Konfirmasi Pengiriman", "CHECK ULANG SEBELUM MENANDAI TERKIRIM, "
-				 		+ " YAKIN TANDAI TERKIRIM? ", 
-						 "OK Terkirim", "Cancel", konfirmDialogKirimListener);
-				 
-				   final ShortcutListener enter = new ShortcutListener("Oke",
-			                KeyCode.ENTER, null) {
-			            @Override
-			            public void handleAction(Object sender, Object target) {
-			            	d.close();
-			            }
-			        };
-				
-				 d.setStyleName("dialog");
-				 d.getOkButton().setStyleName("small");
-				 d.getCancelButton().setStyleName("small");
-				 d.focus();
-			}			
+			 final ConfirmDialog d = ConfirmDialog.show(view.getUI(),"Konfirmasi Pengiriman", "CHECK ULANG SEBELUM MENANDAI TERKIRIM, "
+			 		+ " YAKIN TANDAI TERKIRIM? ", 
+					 "OK Terkirim", "Cancel", konfirmDialogKirimListener);
+			 
+			   final ShortcutListener enter = new ShortcutListener("Oke",
+		                KeyCode.ENTER, null) {
+		            @Override
+		            public void handleAction(Object sender, Object target) {
+		            	d.close();
+		            }
+		        };
+			
+			 d.setStyleName("dialog");
+			 d.getOkButton().setStyleName("small");
+			 d.getCancelButton().setStyleName("small");
+			 d.focus();
 			
 		} else if (event.getButton() == view.getBtnBatalKirim()){
 			if (itemTableSelected != null){			
@@ -207,7 +207,7 @@ public class PenandaanKirimPresenter implements ClickListener, ValueChangeListen
 			}			
 			
 		
-		}else if (event.getButton() == view.getBtnSelectRekapNo()){
+		} else if (event.getButton() == view.getBtnSelectRekapNo()){
 			windowRecapSelectShow();
 		}
 		
@@ -232,11 +232,22 @@ public class PenandaanKirimPresenter implements ClickListener, ValueChangeListen
 		model.getTableJpaContainer().addContainerFilter(filter1);
 
 		//PARSING RECAPNO
+//		Filter[] filterRecaps = new Filter[2];			
+//		filterRecaps[0] = new And(new Like("recapno", "24288"));
+//		filterRecaps[1] = new And(new Like("recapno", "24287"));
 		String recapNo = view.getFieldSearchByRekap().getValue().toString().trim();
 		if (! recapNo.trim().equals("")){
-			Filter filter2 = new And(new SimpleStringFilter("recapno", recapNo, true, false));
+			String [] data = recapNo.split("\\,");			
+			Filter[] filterRecaps = new Filter[data.length];						
+			for (int i=0; i<data.length; i++){			
+				filterRecaps[i] = new And(new Like("recapno", data[i].trim()));
+			}
+			
+			Filter filter2 = new Or(filterRecaps);
 			model.getTableJpaContainer().addContainerFilter(filter2);
+			
 		}
+
 		
 		//JIKA TIDAK DIPILIH YA KOSONG
 		String strDivision="";
@@ -638,7 +649,7 @@ public class PenandaanKirimPresenter implements ClickListener, ValueChangeListen
 			Arinvoice item = new Arinvoice();
 			item = view.getRecapSelectModel().getBeanItemContainerItemHeader().getItem(itemId).getBean();
 			if (item.getSelected().getValue()==true){
-				recapCollection += ", " + item.getRecapno();
+				recapCollection += item.getRecapno() + ", " ;
 			}
 		}
 		
