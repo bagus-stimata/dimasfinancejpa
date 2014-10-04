@@ -79,7 +79,21 @@ public class PenandaanKirimPresenter implements ClickListener, ValueChangeListen
 //		view.getPanelTabel().addActionHandler(this);
 //		view.getPanelForm().addActionHandler(this);
 		
-		
+		ValueChangeListener listenerComboTerkirim = new ValueChangeListener() {			
+			@Override
+			public void valueChange(ValueChangeEvent event) {
+				// TODO Auto-generated method stub
+				view.getBtnBatalKirim().setEnabled(false);
+				view.getBtnSetKirim().setEnabled(false);
+				if (view.getFieldSearchComboTerkirim().getValue().equals("B")){
+					view.getBtnSetKirim().setEnabled(true);					
+				} else if (view.getFieldSearchComboTerkirim().getValue().equals("K")){
+					view.getBtnBatalKirim().setEnabled(true);					
+				}
+			}
+		};
+		view.getFieldSearchComboTerkirim().setImmediate(true);
+		view.getFieldSearchComboTerkirim().addValueChangeListener(listenerComboTerkirim);
 		
 		HeaderClickListener listenerHeaderTableUtama = new HeaderClickListener() {			
 			@Override
@@ -222,6 +236,7 @@ public class PenandaanKirimPresenter implements ClickListener, ValueChangeListen
 	public int searchForm(){
 		//1. Remove filter dan Refresh container dalulu dahulu
 //		//SELALU TUNAI
+		model.getTableJpaContainer().refresh();
 		model.getTableJpaContainer().removeAllContainerFilters();
 		model.setFilterDefaultJpaContainer();
 		

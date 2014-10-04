@@ -13,6 +13,7 @@ import org.dimas.finance.model.ArinvoicePK;
 import org.dimas.finance.model.Arpaymentdetail;
 import org.dimas.finance.model.ArpaymentdetailPK;
 import org.dimas.finance.model.Arpaymentheader;
+import org.dimas.finance.model.ArpaymentheaderPK;
 import org.dimas.finance.model.Bukugiro;
 import org.dimas.finance.model.Bukutransfer;
 import org.dimas.finance.model.Division;
@@ -126,7 +127,7 @@ public class ArPaymentCustomerPresenter implements ClickListener, ValueChangeLis
 			model.itemHeader = new Arpaymentheader();
 			model.itemHeader = model.getBeanItemContainerHeader().getItem(itemId).getBean();		
 			//2. Rubah Isi Containter Detail sesuai dengan header yang dipilih
-			String refno = model.getItemHeader().getRefno();
+			String refno = model.getItemHeader().getId().getRefno();
 			String inv = model.getItemInvoice().getId().getInvoiceno();
 			String div = model.getItemInvoice().getId().getDivision();
 			
@@ -183,7 +184,11 @@ public class ArPaymentCustomerPresenter implements ClickListener, ValueChangeLis
 			if (model.getItemInvoice().getAmount() > model.getItemInvoice().getAmountpay() ){				
 				//ARPAYMENTDETAIL DAN ARPAYMENT HEADER --> BUAT BARU
 				model.itemHeader = new Arpaymentheader();
-				model.getItemHeader().setRefno("xxx");
+				ArpaymentheaderPK id = new ArpaymentheaderPK();
+				id.setRefno("xxx");
+			
+//				model.getItemHeader().setRefno("xxx");
+				model.getItemHeader().setId(id);
 				model.getItemHeader().setEntrydate(new Date());
 				model.getItemHeader().setTransdate(new Date());
 				model.getItemHeader().setUserid("admin");

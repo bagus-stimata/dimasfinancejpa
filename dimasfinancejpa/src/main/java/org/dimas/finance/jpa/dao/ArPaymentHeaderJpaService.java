@@ -9,5 +9,6 @@ import org.dimas.finance.model.Arpaymentheader;
 public interface ArPaymentHeaderJpaService extends GenericJpaService<Arpaymentheader, Serializable>{
 
 	public Arpaymentheader findById(String strId);
+	public List<Arpaymentheader> findAllById(String strRefno, String strDivision);
 	
 }

@@ -91,7 +91,7 @@ public class CustomerCreditView extends CustomComponent {
     
 	public CustomerCreditView(CustomerCreditModel model){
 		this.model = model;		
-		initContainer();
+		initComponent();
 		initFieldFactory();
 		buildView();
 		
@@ -99,7 +99,7 @@ public class CustomerCreditView extends CustomComponent {
 		operationStatus = EnumFormOperationStatus.OPEN.getStrCode();
 		
 	}
-	public void initContainer(){
+	public void initComponent(){
 //		table = new Table("Table:", model.getTableJpaContainer());		
 		
 		table = new Table("Table: ") {
@@ -123,25 +123,6 @@ public class CustomerCreditView extends CustomComponent {
 		    }
 		};		
 		
-		
-	}
-	public void initFieldFactory(){
-//		fieldFactory = new FieldFactory();
-//		customFieldFactory = new CustomFieldFactory();		
-	}
-	public void buildView(){
-		content.setSizeFull();
-		
-		//Inisialisasi Panel 
-		setSizeFull();
-		panelUtama = new Panel(getCaption());
-		panelUtama.setSizeFull();
-
-		panelTop = new Panel();
-		panelTabel = new Panel();
-		panelTabel.setSizeFull();
-		panelForm = new Panel();
-
 		//Init Komponen atas
 		fieldSearchById = new TextField();
 		fieldSearchById.setStyleName(Reindeer.TEXTFIELD_SMALL);
@@ -199,21 +180,6 @@ public class CustomerCreditView extends CustomComponent {
 		fieldAmountSum.setWidth("120px");
 		fieldAmountPaySum.setWidth("110px");
 		
-		//Init komponen tengah
-		table.setSizeFull();
-		table.setSelectable(true);
-//		table.addValueChangeListener(this);
-		table.setImmediate(true);
-		table.setBuffered(false);
-//		table.addActionHandler(this);		
-		table.setFooterVisible(true);
-		
-		//Deklarasi Button dan Listener	
-//		addButton = new Button("Add New");		
-//		deleteButton = new Button("Delete");
-//		commit = new Button("Save");		
-//		discard = new Button("Cancel");
-		
 		btnSearch = new Button("Search");
 		btnSearch.setStyleName(Reindeer.BUTTON_SMALL);
 		btnReload = new Button("Reload");
@@ -231,6 +197,36 @@ public class CustomerCreditView extends CustomComponent {
 		btnSeparator2 = new Button("::");
 		btnSeparator2.setEnabled(false);
 		
+		
+	}
+	public void initFieldFactory(){
+//		fieldFactory = new FieldFactory();
+//		customFieldFactory = new CustomFieldFactory();		
+	}
+	public void buildView(){
+		content.setSizeFull();
+		
+		//Inisialisasi Panel 
+		setSizeFull();
+		panelUtama = new Panel(getCaption());
+		panelUtama.setSizeFull();
+
+		panelTop = new Panel();
+		panelTop.setSizeFull();
+		panelTabel = new Panel();
+		panelTabel.setSizeFull();
+		panelForm = new Panel();
+		panelForm.setSizeFull();
+
+		//Init komponen tengah
+		table.setSizeFull();
+		table.setSelectable(true);
+//		table.addValueChangeListener(this);
+		table.setImmediate(true);
+		table.setBuffered(false);
+//		table.addActionHandler(this);		
+		table.setFooterVisible(true);
+		
 		//Init komponen bawah
 		form = new Form();
 		form.setVisible(false);
@@ -242,46 +238,39 @@ public class CustomerCreditView extends CustomComponent {
 		
 		//DEKLARASI LAYOUT
 		//KOMPONEN ATAS
-		HorizontalLayout layoutTop = new HorizontalLayout();		
-	
-		//KOMPONEN TENGAH
-		VerticalLayout middleLayout = new VerticalLayout();
-		VerticalSplitPanel verticalSplitPanel = new VerticalSplitPanel();
-		verticalSplitPanel.setSizeFull();		
-		verticalSplitPanel.setSplitPosition(85);
+		VerticalLayout layoutTopUtama = new VerticalLayout();
+		layoutTopUtama.setSizeFull();
+		layoutTopUtama.addComponent(panelTop);
 		
-//		layoutTop.addComponent(fieldSearchById);
-//		layoutTop.addComponent(fieldSearchByDesc);
-		layoutTop.addComponent(fieldSearchByInvoice);
-		layoutTop.addComponent(fieldSearchByIdCustomer);
-		layoutTop.addComponent(fieldSearchByNamaCustomer);
-		layoutTop.addComponent(fieldSearchByIdSalesman);
-		layoutTop.addComponent(fieldSearchByNamaSalesman);
-		layoutTop.addComponent(fieldSearchComboLunas);
-		layoutTop.addComponent(fieldSearchByDateInvoiceFrom);
-		layoutTop.addComponent(fieldSearchByDateInvoiceTo);
+		HorizontalLayout layoutTopInner = new HorizontalLayout();		
+		panelTop.setContent(layoutTopInner);
+		
+		layoutTopInner.addComponent(fieldSearchByInvoice);
+		layoutTopInner.addComponent(fieldSearchByIdCustomer);
+		layoutTopInner.addComponent(fieldSearchByNamaCustomer);
+		layoutTopInner.addComponent(fieldSearchByIdSalesman);
+		layoutTopInner.addComponent(fieldSearchByNamaSalesman);
+		layoutTopInner.addComponent(fieldSearchComboLunas);
+		layoutTopInner.addComponent(fieldSearchByDateInvoiceFrom);
+		layoutTopInner.addComponent(fieldSearchByDateInvoiceTo);
 		HorizontalLayout horBut = new HorizontalLayout();
 		
 		
-		layoutTop.addComponent(btnSearch);
-		layoutTop.setComponentAlignment(btnSearch, Alignment.BOTTOM_CENTER);
+		layoutTopInner.addComponent(btnSearch);
+		layoutTopInner.setComponentAlignment(btnSearch, Alignment.BOTTOM_CENTER);
 //		layoutTop.addComponent(btnReload);
 //		layoutTop.setComponentAlignment(btnReload, Alignment.BOTTOM_CENTER);
-		layoutTop.addComponent(btnSeparator1);
-		layoutTop.setComponentAlignment(btnSeparator1, Alignment.BOTTOM_CENTER);
-		layoutTop.addComponent(btnPay);
-		layoutTop.setComponentAlignment(btnPay, Alignment.BOTTOM_CENTER);
-		layoutTop.addComponent(btnLunaskan);
-		layoutTop.setComponentAlignment(btnLunaskan, Alignment.BOTTOM_CENTER);
-		
-		
-//		layoutTop.addComponent(btnSeparator1);
-//		layoutTop.addComponent(addButton);
-//		layoutTop.addComponent(deleteButton);
-//		layoutTop.addComponent(btnSeparator2);
-//		layoutTop.addComponent(btnPrint);
-//		layoutTop.addComponent(btnHelp);		
-		panelTop.setContent(layoutTop);
+		layoutTopInner.addComponent(btnSeparator1);
+		layoutTopInner.setComponentAlignment(btnSeparator1, Alignment.BOTTOM_CENTER);
+		layoutTopInner.addComponent(btnPay);
+		layoutTopInner.setComponentAlignment(btnPay, Alignment.BOTTOM_CENTER);
+		layoutTopInner.addComponent(btnLunaskan);
+		layoutTopInner.setComponentAlignment(btnLunaskan, Alignment.BOTTOM_CENTER);
+
+		//KOMPONEN TENGAH
+		VerticalSplitPanel verticalSplitPanel = new VerticalSplitPanel();
+		verticalSplitPanel.setSizeFull();		
+		verticalSplitPanel.setSplitPosition(85);
 		
 		panelTabel.setContent(table);
 		
@@ -304,20 +293,20 @@ public class CustomerCreditView extends CustomComponent {
 		layoutFooter.addComponent(fieldAmountPaySum);
 		layoutFooter.setSpacing(true);
 		panelForm.setContent(layoutFooter);
-		
-		
+	
 		verticalSplitPanel.setFirstComponent(panelTabel);		
 		verticalSplitPanel.setSecondComponent(panelForm);
 
 		content.addComponent(new Label("***"));
-		content.addComponent(panelTop);
+		content.addComponent(layoutTopUtama);
 		content.addComponent(verticalSplitPanel);
 		
 		panelUtama.setContent(content);
 		panelUtama.setSizeFull();
 		setCompositionRoot(panelUtama);	
 		
-		content.setExpandRatio(verticalSplitPanel, 1);
+		content.setExpandRatio(layoutTopUtama, 1);
+		content.setExpandRatio(verticalSplitPanel, 9);
 		
 	}
 	public void setVisibleTableProperties(Object... tablePropertyIds) {

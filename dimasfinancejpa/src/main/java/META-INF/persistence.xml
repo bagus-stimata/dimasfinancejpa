@@ -14,6 +14,7 @@
     	<class>org.dimas.finance.model.Arpaymentdetail</class>
     	<class>org.dimas.finance.model.ArpaymentdetailPK</class>
     	<class>org.dimas.finance.model.Arpaymentheader</class>
+    	<class>org.dimas.finance.model.ArpaymentheaderPK</class>
     	<class>org.dimas.finance.model.Arretur</class>
     	<class>org.dimas.finance.model.ArreturPK</class>
     	<class>org.dimas.finance.model.Bank</class>

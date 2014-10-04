@@ -90,7 +90,8 @@ public class Arpaymentdetail implements Serializable {
 	
 	//bi-directional many-to-one association to Area
 	@ManyToOne(fetch=FetchType.LAZY)
-	@JoinColumn(name="refno", insertable=false, updatable=false)
+	@JoinColumns({@JoinColumn(name="division", referencedColumnName="division", insertable=false, updatable=false),
+		@JoinColumn(name="refno", referencedColumnName="refno", insertable=false, updatable=false)})	
 	private Arpaymentheader arpaymentheaderBean;
 	
 	public ArpaymentdetailPK getId() {

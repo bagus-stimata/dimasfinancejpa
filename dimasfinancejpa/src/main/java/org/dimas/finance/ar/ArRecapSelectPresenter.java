@@ -122,6 +122,7 @@ public class ArRecapSelectPresenter implements ClickListener, ValueChangeListene
 		
 	}
 	public void searchForm(){
+		model.reload();
 		model.getBeanItemContainerItemHeader().removeAllContainerFilters();
 		model.getBeanItemContainerItemHeader().removeAllItems();
 		//2. Baru Kasih Filter Lagi

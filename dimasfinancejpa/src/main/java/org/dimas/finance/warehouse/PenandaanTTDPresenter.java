@@ -82,6 +82,21 @@ public class PenandaanTTDPresenter implements ClickListener, ValueChangeListener
 //		view.getPanelTabel().addActionHandler(this);
 //		view.getPanelForm().addActionHandler(this);
 		
+		ValueChangeListener listenerComboTertunda = new ValueChangeListener() {			
+			@Override
+			public void valueChange(ValueChangeEvent event) {
+				// TODO Auto-generated method stub
+				view.getBtnBatalTertunda().setEnabled(false);
+				view.getBtnSetTertunda().setEnabled(false);
+				if (view.getFieldSearchComboTertunda().getValue().equals("TDK")){
+					view.getBtnSetTertunda().setEnabled(true);					
+				} else if (view.getFieldSearchComboTertunda().getValue().equals("TTD")){
+					view.getBtnBatalTertunda().setEnabled(true);					
+				}
+			}
+		};
+		view.getFieldSearchComboTertunda().setImmediate(true);
+		view.getFieldSearchComboTertunda().addValueChangeListener(listenerComboTertunda);
 		
 		
 		HeaderClickListener listenerHeaderTableUtama = new HeaderClickListener() {			
@@ -190,23 +205,21 @@ public class PenandaanTTDPresenter implements ClickListener, ValueChangeListener
 			 d.focus();
 			
 		} else if (event.getButton() == view.getBtnBatalTertunda()){
-			if (itemTableSelected != null){			
-				 final ConfirmDialog d = ConfirmDialog.show(view.getUI(),"Konfirmasi Batal Tertunda", "BATALKAN PENANDAAN TERTUNDA?: ", 
-						 "Batalkan", "Cancel", konfirmDialogBatalTertundaListener);
-				 
-				   final ShortcutListener enter = new ShortcutListener("Oke",
-			                KeyCode.ENTER, null) {
-			            @Override
-			            public void handleAction(Object sender, Object target) {
-			            	d.close();
-			            }
-			        };
-				
-				 d.setStyleName("dialog");
-				 d.getOkButton().setStyleName("small");
-				 d.getCancelButton().setStyleName("small");
-				 d.focus();
-			}			
+			 final ConfirmDialog d = ConfirmDialog.show(view.getUI(),"Konfirmasi Batal Tertunda", "BATALKAN PENANDAAN TERTUNDA?: ", 
+					 "Batalkan", "Cancel", konfirmDialogBatalTertundaListener);
+			 
+			   final ShortcutListener enter = new ShortcutListener("Oke",
+		                KeyCode.ENTER, null) {
+		            @Override
+		            public void handleAction(Object sender, Object target) {
+		            	d.close();
+		            }
+		        };
+			
+			 d.setStyleName("dialog");
+			 d.getOkButton().setStyleName("small");
+			 d.getCancelButton().setStyleName("small");
+			 d.focus();
 			
 		} else if (event.getButton() == view.getBtnSelectRekapNo()){
 			windowRecapSelectShow();
@@ -224,6 +237,7 @@ public class PenandaanTTDPresenter implements ClickListener, ValueChangeListener
 	public int searchForm(){
 		//1. Remove filter dan Refresh container dalulu dahulu
 //		//SELALU TUNAI
+		model.getTableJpaContainer().refresh();
 		model.getTableJpaContainer().removeAllContainerFilters();
 		model.setFilterDefaultJpaContainer();
 		
@@ -384,11 +398,15 @@ public class PenandaanTTDPresenter implements ClickListener, ValueChangeListener
 							model.getManagerTransaksi().getCurrentTanggalTransaksiBerjalan(item.getDivisionBean());
 					Calendar calTomorrow = Calendar.getInstance();
 					calTomorrow.setTime(tglTransaksiBerjalan);
-					calTomorrow.add(Calendar.DATE, 1);
+					//ACTUAL DUE DATE DIMAJUKAN 
+					calTomorrow.add(Calendar.DATE, 1 + item.getTerm());
 					
 					Calendar cal = Calendar.getInstance();
 					cal.setTime(item.getActualduedate());
 					cal.add(Calendar.DATE, 1);
+					
+					System.out.println(item.getActualduedate());
+					System.out.println(calTomorrow.getTime());
 					
 					if ( item.getActualduedate().getTime() <= calTomorrow.getTime().getTime()) {
 						
@@ -446,7 +464,7 @@ public class PenandaanTTDPresenter implements ClickListener, ValueChangeListener
 						
 						Calendar cal = Calendar.getInstance();
 						cal.setTime(item.getActualduedate());
-						cal.add(Calendar.DATE, -1);
+						cal.add(Calendar.DATE, -1 - item.getTerm());
 						
 						if ( item.getActualduedate().getTime() > tglTransaksiBerjalan.getTime()) {						
 

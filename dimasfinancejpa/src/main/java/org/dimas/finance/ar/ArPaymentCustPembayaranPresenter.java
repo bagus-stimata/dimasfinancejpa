@@ -6,6 +6,7 @@ import org.dimas.finance.model.Arinvoice;
 import org.dimas.finance.model.Arpaymentdetail;
 import org.dimas.finance.model.ArpaymentdetailPK;
 import org.dimas.finance.model.Arpaymentheader;
+import org.dimas.finance.model.ArpaymentheaderPK;
 import org.dimas.finance.model.Bukugiro;
 import org.dimas.finance.model.Bukutransfer;
 import org.dimas.finance.model.modelenum.EnumFormOperationStatus;
@@ -538,9 +539,14 @@ public class ArPaymentCustPembayaranPresenter implements ClickListener{
 					
 					//OPERASI PENAMBAHAN  
 					if (model.getFormOperationStatus().equals(EnumFormOperationStatus.ADDING.getStrCode())){						
-						String newNomorUrut = model.getManagerTransaksi().getNewNomorUrutArPayment();
+						String newNomorUrut="";
+//						String newNomorUrut = model.getManagerTransaksi().getNewNomorUrutArPayment();
 						//1. LENGKAPI DETAIL HEADER
-						model.getArPaymentHeader().setRefno(newNomorUrut);
+//						model.getArPaymentHeader().setRefno(newNomorUrut);
+						ArpaymentheaderPK id = new ArpaymentheaderPK();
+						id.setRefno(newNomorUrut);
+						
+						model.getArPaymentHeader().setId(id);
 						//2. LENGKAPI HEADER DETAIL
 						ArpaymentdetailPK arpaymentdetailPK = new ArpaymentdetailPK();
 						arpaymentdetailPK = model.getArPaymentDetail().getId();

@@ -89,7 +89,7 @@ public class PelunasanTunaiView extends CustomComponent {
 	
 	public PelunasanTunaiView(PelunasanTunaiModel model){
 		this.model = model;		
-		initContainer();
+		initComponent();
 		initFieldFactory();
 		buildView();
 		
@@ -98,7 +98,7 @@ public class PelunasanTunaiView extends CustomComponent {
 		
 	}
 	
-	public void initContainer(){
+	public void initComponent(){
 //		table = new Table("Table:", model.getTableJpaContainer());		
 		
 		table = new Table("Table: ") {
@@ -122,29 +122,7 @@ public class PelunasanTunaiView extends CustomComponent {
 		    }
 		};		
 		
-		
-	}
 	
-	public void initFieldFactory(){
-		// Can't access the editable components from the table so
-		// must store the information
-	}
-	
-	public void buildView(){
-		content.setSizeFull();
-		
-		//Inisialisasi Panel 
-		setSizeFull();
-		panelUtama = new Panel(getCaption());
-		panelUtama.setSizeFull();
-
-		panelTop = new Panel();
-		panelTabel = new Panel();
-		panelTabel.setSizeFull();
-		panelForm = new Panel();
-
-		//Init Komponen atas
-		
 		fieldSearchByRekap = new TextField("NO. REKAP");
 		fieldSearchByRekap.setStyleName(Reindeer.TEXTFIELD_SMALL);
 		fieldSearchByRekap.setWidth("90px");
@@ -186,21 +164,6 @@ public class PelunasanTunaiView extends CustomComponent {
 		fieldCanvasSum.setWidth("110px");
 		fieldAmountSum.setWidth("120px");
 		fieldAmountPaySum.setWidth("110px");
-	    
-		//Init komponen tengah
-		table.setSizeFull();
-		table.setSelectable(true);
-//		table.addValueChangeListener(this);
-		table.setImmediate(true);
-		table.setBuffered(false);
-//		table.addActionHandler(this);		
-		table.setFooterVisible(true);
-		
-		//Deklarasi Button dan Listener	
-//		addButton = new Button("Add New");		
-//		deleteButton = new Button("Delete");
-//		commit = new Button("Save");		
-//		discard = new Button("Cancel");
 		
 		btnSearch = new Button("Search");
 		btnSearch.setStyleName(Reindeer.BUTTON_SMALL);
@@ -211,8 +174,6 @@ public class PelunasanTunaiView extends CustomComponent {
 		btnBatalLunaskan = new Button("Batalkan");
 		btnBatalLunaskan.setStyleName(Reindeer.BUTTON_SMALL);
 		
-		
-		
 		btnPrint = new Button("Print");
 		btnHelp = new Button("Help");
 		
@@ -220,6 +181,41 @@ public class PelunasanTunaiView extends CustomComponent {
 		btnSeparator1.setEnabled(false);
 		btnSeparator2 = new Button("::");
 		btnSeparator2.setEnabled(false);
+		
+		
+	}
+	
+	public void initFieldFactory(){
+		// Can't access the editable components from the table so
+		// must store the information
+	}
+	
+	public void buildView(){
+		content.setSizeFull();
+		
+		//Inisialisasi Panel 
+		setSizeFull();
+		panelUtama = new Panel(getCaption());
+		panelUtama.setSizeFull();
+
+		panelTop = new Panel();
+		panelTop.setSizeFull();
+		panelTabel = new Panel();
+		panelTabel.setSizeFull();
+		panelForm = new Panel();
+		panelForm.setSizeFull();
+
+		//Init Komponen atas
+		
+	    
+		//Init komponen tengah
+		table.setSizeFull();
+		table.setSelectable(true);
+//		table.addValueChangeListener(this);
+		table.setImmediate(true);
+		table.setBuffered(false);
+//		table.addActionHandler(this);		
+		table.setFooterVisible(true);
 		
 		//Init komponen bawah
 		form = new Form();
@@ -229,42 +225,38 @@ public class PelunasanTunaiView extends CustomComponent {
 		
 		//DEKLARASI LAYOUT
 		//KOMPONEN ATAS
-		HorizontalLayout layoutTop = new HorizontalLayout();		
-	
+		VerticalLayout layoutTopUtama = new VerticalLayout();
+		layoutTopUtama.setSizeFull();
+		layoutTopUtama.addComponent(panelTop);
+		
+		HorizontalLayout layoutTopInner = new HorizontalLayout();		
+		panelTop.setContent(layoutTopInner);
+		
+		layoutTopInner.addComponent(fieldSearchByRekap);
+		layoutTopInner.addComponent(btnSelectRekapNo);
+		layoutTopInner.addComponent(fieldSearchComboDivisi);
+		layoutTopInner.addComponent(fieldSearchByInvoice);	
+		layoutTopInner.addComponent(fieldSearchComboSalesman);
+		layoutTopInner.addComponent(fieldSearchComboLunas);
+		
+		layoutTopInner.addComponent(fieldSearchByDateInvoiceFrom);
+		layoutTopInner.addComponent(fieldSearchByDateInvoiceTo);
+		
+		layoutTopInner.setComponentAlignment(btnSelectRekapNo, Alignment.BOTTOM_CENTER);
+
+		layoutTopInner.addComponent(btnSearch);
+		layoutTopInner.setComponentAlignment(btnSearch, Alignment.BOTTOM_CENTER);
+		layoutTopInner.addComponent(btnSeparator1);
+		layoutTopInner.setComponentAlignment(btnSeparator1, Alignment.BOTTOM_CENTER);
+		layoutTopInner.addComponent(btnLunaskan);
+		layoutTopInner.setComponentAlignment(btnLunaskan, Alignment.BOTTOM_CENTER);
+		layoutTopInner.addComponent(btnBatalLunaskan);
+		layoutTopInner.setComponentAlignment(btnBatalLunaskan, Alignment.BOTTOM_CENTER);
+		
 		//KOMPONEN TENGAH
-		VerticalLayout middleLayout = new VerticalLayout();
 		VerticalSplitPanel verticalSplitPanel = new VerticalSplitPanel();
 		verticalSplitPanel.setSizeFull();		
 		verticalSplitPanel.setSplitPosition(85);
-		
-		layoutTop.addComponent(fieldSearchByRekap);
-		layoutTop.addComponent(btnSelectRekapNo);
-		layoutTop.addComponent(fieldSearchComboDivisi);
-		layoutTop.addComponent(fieldSearchByInvoice);	
-		layoutTop.addComponent(fieldSearchComboSalesman);
-		layoutTop.addComponent(fieldSearchComboLunas);
-		
-		layoutTop.addComponent(fieldSearchByDateInvoiceFrom);
-		layoutTop.addComponent(fieldSearchByDateInvoiceTo);
-		
-		layoutTop.setComponentAlignment(btnSelectRekapNo, Alignment.BOTTOM_CENTER);
-
-		HorizontalLayout horBut = new HorizontalLayout();
-		
-		
-		layoutTop.addComponent(btnSearch);
-		layoutTop.setComponentAlignment(btnSearch, Alignment.BOTTOM_CENTER);
-//		layoutTop.addComponent(btnReload);
-//		layoutTop.setComponentAlignment(btnReload, Alignment.BOTTOM_CENTER);
-		layoutTop.addComponent(btnSeparator1);
-		layoutTop.setComponentAlignment(btnSeparator1, Alignment.BOTTOM_CENTER);
-		layoutTop.addComponent(btnLunaskan);
-		layoutTop.setComponentAlignment(btnLunaskan, Alignment.BOTTOM_CENTER);
-		layoutTop.addComponent(btnBatalLunaskan);
-		layoutTop.setComponentAlignment(btnBatalLunaskan, Alignment.BOTTOM_CENTER);
-		
-		
-		panelTop.setContent(layoutTop);
 		
 		panelTabel.setContent(table);
 		
@@ -289,14 +281,16 @@ public class PelunasanTunaiView extends CustomComponent {
 		verticalSplitPanel.setSecondComponent(panelForm);
 
 		content.addComponent(new Label("***"));
-		content.addComponent(panelTop);
+		content.addComponent(layoutTopUtama);
 		content.addComponent(verticalSplitPanel);
 		
 		panelUtama.setContent(content);
 		panelUtama.setSizeFull();
 		setCompositionRoot(panelUtama);	
 		
-		content.setExpandRatio(verticalSplitPanel, 1);
+		content.setExpandRatio(layoutTopUtama, 1);
+		content.setExpandRatio(verticalSplitPanel, 9);
+		
 		
 	}
 	
@@ -355,7 +349,7 @@ public class PelunasanTunaiView extends CustomComponent {
 		table.setColumnHeader("tunaikredit", "T/K");
 		table.setColumnHeader("lunas", "LNS");
 		table.setColumnHeader("term", "TOP");
-		table.setColumnHeader("tipejual", "TO/C");
+		table.setColumnHeader("tipejual", "TO/TF/C");
 		
 		
 //		table.setColumnExpandRatio("selected", 2);
@@ -392,6 +386,9 @@ public class PelunasanTunaiView extends CustomComponent {
 	
 	public void setDisplaySearchComponent(){
 		getFieldSearchComboDivisi().setContainerDataSource(model.getBeanItemContainerDivision());
+		getFieldSearchComboDivisi().setNullSelectionAllowed(false);
+		getFieldSearchComboDivisi().select(model.getBeanItemContainerDivision().getIdByIndex(0));
+		
 		getFieldSearchComboSalesman().setContainerDataSource(model.getBeanItemContainerSalesman());
 		
 		fieldSearchComboLunas.addItem("B");

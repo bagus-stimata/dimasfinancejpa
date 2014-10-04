@@ -9,6 +9,7 @@ import org.dimas.finance.model.Arinvoice;
 import org.dimas.finance.model.Arpaymentdetail;
 import org.dimas.finance.model.ArpaymentdetailPK;
 import org.dimas.finance.model.Arpaymentheader;
+import org.dimas.finance.model.ArpaymentheaderPK;
 import org.dimas.finance.model.Division;
 import org.dimas.finance.model.Salesman;
 import org.dimas.finance.model.modelenum.EnumFormOperationStatus;
@@ -219,6 +220,7 @@ public class PelunasanTunaiPresenter implements ClickListener, ValueChangeListen
 	public int searchForm(){
 		//1. Remove filter dan Refresh container dalulu dahulu
 //		//SELALU TUNAI
+		model.getTableJpaContainer().refresh();
 		model.getTableJpaContainer().removeAllContainerFilters();
 		model.setFilterDefaultJpaContainer();
 		
@@ -359,24 +361,34 @@ public class PelunasanTunaiPresenter implements ClickListener, ValueChangeListen
 	public void lunaskan(){
 		
 			try{
+				Division division = new Division();
+				try{
+					division = model.getBeanItemContainerDivision().getItem(view.getFieldSearchComboDivisi().getConvertedValue()).getBean();
+				} catch(Exception ex){}
 				
-				String newRefno = model.getManagerTransaksi().getNewNomorUrutArPayment();
+				String newRefno = model.getManagerTransaksi().getNewNomorUrutArPayment(division);
 				//1. BUAT HEADER
 				Arpaymentheader itemHeader = new Arpaymentheader();
-				itemHeader.setRefno(newRefno);
+				ArpaymentheaderPK id = new ArpaymentheaderPK();
+				id.setRefno(newRefno);
+				id.setDivision(division.getId());
+				itemHeader.setId(id);				
+//				itemHeader.setRefno(newRefno);
+				
+				itemHeader.setDivisionBean(division);
 				itemHeader.setEntrydate(new Date());
 				itemHeader.setTransdate(new Date());
 				itemHeader.setUserid("admin");
-				itemHeader.setClosing(false);				
+				itemHeader.setClosing(false);			
+				
 				model.getArpaymentHeaderService().createObject(itemHeader);
 				
 				//SYARAT INVOICE DILUNASKAN
 				//1. Diseleksi dari Table
 				//2. Belum Lunas
-				
+				List<Object> listItemProses = new ArrayList<Object>();				
 				int nomorUrut=0;
-				Collection itemIds =  model.getTableJpaContainer().getItemIds();
-				
+				Collection itemIds =  model.getTableJpaContainer().getItemIds();				
 				for (Object itemId: itemIds){
 					
 					Arinvoice item = new Arinvoice();
@@ -405,14 +417,16 @@ public class PelunasanTunaiPresenter implements ClickListener, ValueChangeListen
 						item.setAmountpay(item.getAmount());
 						item.setLunas(true);
 						model.getArInvoiceService().updateObject(item);
-						
+
 						//REFRESH SATU PERSATU >> lebih cepat
-						model.getTableJpaContainer().refreshItem(itemId);
+						listItemProses.add(itemId);
 						
-					}
-				
+					}				
 				}
-				
+				//UPDATE CONTAINER AND TABLE
+				for (Object itemId: listItemProses){
+					model.getTableJpaContainer().refreshItem(itemId);
+				}
 ////				REFRESH KELAMAAN
 //				model.getTableJpaContainer().refresh();
 				view.getTable().refreshRowCache();

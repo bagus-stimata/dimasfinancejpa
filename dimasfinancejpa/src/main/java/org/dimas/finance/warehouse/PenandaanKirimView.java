@@ -88,8 +88,8 @@ public class PenandaanKirimView extends CustomComponent {
     private TextField fieldAmountPaySum = new TextField("BAYAR: ");
 	
 	public PenandaanKirimView(PenandaanKirimModel model){
-		this.model = model;		
-		initContainer();
+		this.model = model;
+		initComponent();
 		initFieldFactory();
 		buildView();
 		
@@ -98,7 +98,7 @@ public class PenandaanKirimView extends CustomComponent {
 		
 	}
 	
-	public void initContainer(){
+	public void initComponent(){
 //		table = new Table("Table:", model.getTableJpaContainer());		
 		
 		table = new Table("Table: ") {
@@ -121,29 +121,6 @@ public class PenandaanKirimView extends CustomComponent {
 		        return super.formatPropertyValue(rowId, colId, property);
 		    }
 		};		
-		
-		
-	}
-	
-	public void initFieldFactory(){
-		// Can't access the editable components from the table so
-		// must store the information
-	}
-	
-	public void buildView(){
-		content.setSizeFull();
-		
-		//Inisialisasi Panel 
-		setSizeFull();
-		panelUtama = new Panel(getCaption());
-		panelUtama.setSizeFull();
-
-		panelTop = new Panel();
-		panelTabel = new Panel();
-		panelTabel.setSizeFull();
-		panelForm = new Panel();
-
-		//Init Komponen atas
 		
 		fieldSearchByRekap = new TextField("NO. REKAP");
 		fieldSearchByRekap.setStyleName(Reindeer.TEXTFIELD_SMALL);
@@ -227,44 +204,65 @@ public class PenandaanKirimView extends CustomComponent {
 		form.setBuffered(true);
 		form.setImmediate(false);
 		
-		//DEKLARASI LAYOUT
-		//KOMPONEN ATAS
-		HorizontalLayout layoutTop = new HorizontalLayout();		
+	}
 	
-		//KOMPONEN TENGAH
-		VerticalLayout middleLayout = new VerticalLayout();
-		VerticalSplitPanel verticalSplitPanel = new VerticalSplitPanel();
-		verticalSplitPanel.setSizeFull();		
-		verticalSplitPanel.setSplitPosition(85);
+	public void initFieldFactory(){
+		// Can't access the editable components from the table so
+		// must store the information
+	}
+	
+	public void buildView(){
 		
-		layoutTop.addComponent(fieldSearchByRekap);
-		layoutTop.addComponent(btnSelectRekapNo);
-		layoutTop.addComponent(fieldSearchComboDivisi);
-		layoutTop.addComponent(fieldSearchByInvoice);	
-		layoutTop.addComponent(fieldSearchComboSalesman);
-		layoutTop.addComponent(fieldSearchComboTerkirim);
+		//Inisialisasi Panel 
+		content.setSizeFull();
+		setSizeFull();
+		panelUtama = new Panel(getCaption());
+		panelUtama.setSizeFull();
 		
-		layoutTop.addComponent(fieldSearchByDateInvoiceFrom);
-		layoutTop.addComponent(fieldSearchByDateInvoiceTo);
+		panelTop = new Panel();
+		panelTop.setSizeFull();
+		panelTabel = new Panel();
+		panelTabel.setSizeFull();
+		panelForm = new Panel();
+		panelForm.setSizeFull();
+		
+		//Init Komponen atas
+		VerticalLayout layoutTopUtama = new VerticalLayout();
+		layoutTopUtama.setSizeFull();
+		layoutTopUtama.addComponent(panelTop);
+		
+		HorizontalLayout layoutTopInner = new HorizontalLayout();		
+		panelTop.setContent(layoutTopInner);
+		
+		layoutTopInner.addComponent(fieldSearchByRekap);
+		layoutTopInner.addComponent(btnSelectRekapNo);
+		layoutTopInner.setComponentAlignment(btnSelectRekapNo, Alignment.BOTTOM_CENTER);
+		layoutTopInner.addComponent(fieldSearchComboDivisi);
+		layoutTopInner.addComponent(fieldSearchByInvoice);	
+		layoutTopInner.addComponent(fieldSearchComboSalesman);
+		layoutTopInner.addComponent(fieldSearchComboTerkirim);
+		
+		layoutTopInner.addComponent(fieldSearchByDateInvoiceFrom);
+		layoutTopInner.addComponent(fieldSearchByDateInvoiceTo);
 
-		layoutTop.setComponentAlignment(btnSelectRekapNo, Alignment.BOTTOM_CENTER);
-		
-		HorizontalLayout horBut = new HorizontalLayout();
-		
-		
-		layoutTop.addComponent(btnSearch);
-		layoutTop.setComponentAlignment(btnSearch, Alignment.BOTTOM_CENTER);
-//		layoutTop.addComponent(btnReload);
-//		layoutTop.setComponentAlignment(btnReload, Alignment.BOTTOM_CENTER);
-		layoutTop.addComponent(btnSeparator1);
-		layoutTop.setComponentAlignment(btnSeparator1, Alignment.BOTTOM_CENTER);
-		layoutTop.addComponent(btnSetKirim);
-		layoutTop.setComponentAlignment(btnSetKirim, Alignment.BOTTOM_CENTER);
-		layoutTop.addComponent(btnBatalKirim);
-		layoutTop.setComponentAlignment(btnBatalKirim, Alignment.BOTTOM_CENTER);
+
+		layoutTopInner.addComponent(btnSearch);
+		layoutTopInner.setComponentAlignment(btnSearch, Alignment.BOTTOM_CENTER);
+		layoutTopInner.addComponent(btnSeparator1);
+		layoutTopInner.setComponentAlignment(btnSeparator1, Alignment.BOTTOM_CENTER);
+		layoutTopInner.addComponent(btnSetKirim);
+		layoutTopInner.setComponentAlignment(btnSetKirim, Alignment.BOTTOM_CENTER);
+		layoutTopInner.addComponent(btnBatalKirim);
+		layoutTopInner.setComponentAlignment(btnBatalKirim, Alignment.BOTTOM_CENTER);
 		
 		
-		panelTop.setContent(layoutTop);
+		//KOMPONEN TENGAH
+		VerticalSplitPanel verticalSplitPanelUtama = new VerticalSplitPanel();
+		verticalSplitPanelUtama.setSizeFull();		
+		verticalSplitPanelUtama.setSplitPosition(85);
+		
+		
+//		HorizontalLayout horBut = new HorizontalLayout();
 		
 		panelTabel.setContent(table);
 		
@@ -285,21 +283,24 @@ public class PenandaanKirimView extends CustomComponent {
 		layoutFooter.setSpacing(true);
 		panelForm.setContent(layoutFooter);
 		
-		verticalSplitPanel.setFirstComponent(panelTabel);		
-		verticalSplitPanel.setSecondComponent(panelForm);
+		verticalSplitPanelUtama.setFirstComponent(panelTabel);		
+		verticalSplitPanelUtama.setSecondComponent(panelForm);
 
 		content.addComponent(new Label("***"));
-		content.addComponent(panelTop);
-		content.addComponent(verticalSplitPanel);
+		
+		content.addComponent(layoutTopUtama);
+		content.addComponent(verticalSplitPanelUtama);
 		
 		panelUtama.setContent(content);
 		panelUtama.setSizeFull();
 		setCompositionRoot(panelUtama);	
 		
-		content.setExpandRatio(verticalSplitPanel, 1);
+		content.setExpandRatio(layoutTopUtama, 1);
+		content.setExpandRatio(verticalSplitPanelUtama, 10);
 		
 		//VISIBLE COMPONEN
 		fieldAmountPaySum.setVisible(false);
+		
 	}
 	
 	public void setVisibleTableProperties(Object... tablePropertyIds) {
@@ -395,7 +396,10 @@ public class PenandaanKirimView extends CustomComponent {
 	}
 	
 	public void setDisplaySearchComponent(){
-		getFieldSearchComboDivisi().setContainerDataSource(model.getBeanItemContainerDivision());
+		getFieldSearchComboDivisi().setContainerDataSource(model.getBeanItemContainerDivision());		
+		getFieldSearchComboDivisi().setNullSelectionAllowed(false);
+		getFieldSearchComboDivisi().select(model.getBeanItemContainerDivision().getIdByIndex(0));
+		
 		getFieldSearchComboSalesman().setContainerDataSource(model.getBeanItemContainerSalesman());
 		
 		fieldSearchComboTerkirim.addItem("B");
@@ -406,13 +410,15 @@ public class PenandaanKirimView extends CustomComponent {
 		fieldSearchComboTerkirim.setItemCaption("S", "Semua");
 		fieldSearchComboTerkirim.setStyleName(Reindeer.TEXTFIELD_SMALL);
 		fieldSearchComboTerkirim.setWidth("70px");
+
 		//DEFAULT VIEW
 		fieldSearchComboTerkirim.select("B");
 		
 	}
 	
 	public void setDisplay(){
-		//1. Refresh Table displa
+		
+		//1. Refresh Table display
 //		table.setContainerDataSource(model.getTableBeanItemContainer());
 		table.setContainerDataSource(model.getTableJpaContainer());
 		

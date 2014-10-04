@@ -372,6 +372,7 @@ public class RegionPresenter implements ClickListener, ValueChangeListener, Hand
 	}
 	public int searchForm(){
 		//1. Remove filter dan Refresh container dalulu dahulu
+		model.getTableJpaContainer().refresh();
 		model.getTableJpaContainer().removeAllContainerFilters();
 		
 		//2. Baru Kasih Filter Lagi

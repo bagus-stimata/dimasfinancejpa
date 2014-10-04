@@ -76,6 +76,7 @@ public class PenerimaanKBHeaderSelectPresenter implements ClickListener, ValueCh
 		
 	}
 	public void searchForm(){
+		model.reload();
 		model.getBeanItemContainerBkbHeader().removeAllContainerFilters();
 		model.getBeanItemContainerBkbHeader().removeAllItems();
 		//2. Baru Kasih Filter Lagi

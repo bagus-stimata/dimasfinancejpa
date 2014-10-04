@@ -50,16 +50,19 @@ public class TransaksiHelper {
 		
 	}
 	
-	public String getCurrentNomorUrutArPayment(){
+	public String getCurrentNomorUrutArPayment(Division division){
 		String nomorUrutSekarang = "0000001";
 		int panjang = 7;
 		String prefix ="";
 		Sysvar sysvar = new Sysvar();
-		sysvar = sysvarService.findById("_URUT_AR");
 		//1. GET NOMOR URUT SEKARANG
 		//2. NOMOR URUT SEKARANG TAMBAH 1
 		//3. CEK (DENGAN PERULANGAN)>> JIKA NOMOR URUT SEKARANG SUDAH TER PAKAI MAKA TAMBAH 1 LAGI
-		if (sysvar.getNilaiString1() != null){
+		List<Sysvar> listSysvar = new ArrayList<Sysvar>();
+		listSysvar = sysvarService.findAllById("_URUT_AR", division.getId());
+		if (listSysvar.size() > 0){
+			//AMBIL SYSVAR
+			sysvar = listSysvar.get(0);
 			nomorUrutSekarang = sysvar.getNilaiString1().trim();
 			panjang = sysvar.getLenghtData();
 			//ANTISIPASI NILAI NULL
@@ -71,18 +74,21 @@ public class TransaksiHelper {
 		String currentKode = nomorUrutSekarang;
 		return currentKode;
 	}	
-	public String getNewNomorUrutArPayment(){
+	public String getNewNomorUrutArPayment(Division division){
 		boolean baru=true;
 		
 		String nomorUrutSekarang = "0000001";
 		int panjang = 7;
 		String prefix ="";
 		Sysvar sysvar = new Sysvar();
-		sysvar = sysvarService.findById("_URUT_AR");
 		//1. GET NOMOR URUT SEKARANG
 		//2. NOMOR URUT SEKARANG TAMBAH 1
 		//3. CEK (DENGAN PERULANGAN)>> JIKA NOMOR URUT SEKARANG SUDAH TER PAKAI MAKA TAMBAH 1 LAGI
-		if (sysvar.getNilaiString1() != null){
+		List<Sysvar> listSysvar = new ArrayList<Sysvar>();
+		listSysvar = sysvarService.findAllById("_URUT_AR", division.getId());
+		if (listSysvar.size() > 0){
+			//AMBIL SYSVAR
+			sysvar = listSysvar.get(0);
 			nomorUrutSekarang = sysvar.getNilaiString1().trim();
 			panjang = sysvar.getLenghtData();
 			//ANTISIPASI NILAI NULL
@@ -90,13 +96,10 @@ public class TransaksiHelper {
 				prefix = sysvar.getPrefix().trim();
 			}
 		}
-		
-		
-		
 		//PEMBUATAN KODE BARU DIMULAI
 		String newKode = nomorUrutSekarang;
-
-		//JIKA AR PAYMENT BARU		
+		
+		//TAMBAH PANJANG SESUAI DENGAN LEN	
 		if (arpaymentHeaderService.count() <= 0){
 			int intKode = Integer.valueOf(newKode);
 			intKode +=1;
@@ -115,7 +118,8 @@ public class TransaksiHelper {
 			baru=false;
 		}
 		
-		if (baru==false){
+		//ULANG SAMPAI TIDAK ADA YANG KEMBAR >> JIKA NAIK SATU TIDAK KEMBAR MAKA ITU NOMOR SEKARANG
+		if (arpaymentHeaderService.count()>0){
 			boolean kodeKembar = true;
 			while (kodeKembar==true){
 				//1. Jadikan integer dan tambah satu
@@ -136,24 +140,21 @@ public class TransaksiHelper {
 				newKode = strKode;
 				
 				//JIKA TIDAK ADA YANG SAMA MAKA BERHENTI
-				Arpaymentheader itemHeader = new Arpaymentheader();
-				itemHeader = arpaymentHeaderService.findById(newKode);
-				try{
-					if (itemHeader==null){
-						kodeKembar = false;
-					}
-				} catch(Exception ex){}			
-				try{
-					if (itemHeader.getRefno()==null){
-						kodeKembar = false;
-					}
-				} catch(Exception ex){}
+				Arpaymentheader domain = new Arpaymentheader();
+				List<Arpaymentheader> listDomain = new ArrayList<Arpaymentheader>();
+				listDomain = arpaymentHeaderService.findAllById(newKode, division.getId());
+				
+				if (listDomain.size()==0){
+					kodeKembar = false;
+				}
 				
 				//GAK TAHU KENAPA KOK GAK MAU ANGKA 2
 				if (strKode.equals("2")) {
 					kodeKembar = false;
 				}
 			}
+		} else {
+			
 		}
 		//Rubah nilai SYSVAR BARU di database donk
 		sysvar.setNilaiString1(newKode);
@@ -161,6 +162,7 @@ public class TransaksiHelper {
 		
 		return newKode;
 	}
+	
 	public Date getCurrentTanggalTransaksiBerjalan(Division division){
 		Date transDate = new Date();
 		//1. AMBIL TANGGAL TRANSAKSI BERJALAN SEKARANG
@@ -239,37 +241,40 @@ public class TransaksiHelper {
 		}
 		
 		//ULANG SAMPAI TIDAK ADA YANG KEMBAR >> JIKA NAIK SATU TIDAK KEMBAR MAKA ITU NOMOR SEKARANG
-		boolean kodeKembar = true;
-		while (kodeKembar==true){
-			//1. Jadikan integer dan tambah satu
-			//2. Tambah panjang sampai 7 dan tambah prefix
-			//3. CEK >> DATABASE >> JIKA TIDAK KEMBAR MAKA KEMBAR FALSE
-			int intKode = Integer.valueOf(newKode);
-			intKode +=1;
-			String strKode = String.valueOf(intKode);
-			
-			int len = 0;
-			//JIKA MELEBIHI PANJANG MAKA AKAN MEMANJANG OTOMATIS
-			while (len < panjang-1) {				
-				len = strKode.length();
-				strKode = "0" + strKode;
-			}
-			strKode = prefix + strKode;
-			//INTINYA
-			newKode = strKode;
-			
-			//JIKA TIDAK ADA YANG SAMA MAKA BERHENTI
-			Bukugiro bukuGiro = new Bukugiro();
-			List<Bukugiro> listBukugiro = new ArrayList<Bukugiro>();
-			listBukugiro = bukuGiroService.findAllById(newKode, division.getId());
-			
-			if (listBukugiro.size()==0){
-				kodeKembar = false;
-			}
-			
-			//GAK TAHU KENAPA KOK GAK MAU ANGKA 2
-			if (strKode.equals("2")) {
-				kodeKembar = false;
+		//ULANG SAMPAI TIDAK ADA YANG KEMBAR >> JIKA NAIK SATU TIDAK KEMBAR MAKA ITU NOMOR SEKARANG
+		if (arpaymentHeaderService.count()>0){
+			boolean kodeKembar = true;
+			while (kodeKembar==true){
+				//1. Jadikan integer dan tambah satu
+				//2. Tambah panjang sampai 7 dan tambah prefix
+				//3. CEK >> DATABASE >> JIKA TIDAK KEMBAR MAKA KEMBAR FALSE
+				int intKode = Integer.valueOf(newKode);
+				intKode +=1;
+				String strKode = String.valueOf(intKode);
+				
+				int len = 0;
+				//JIKA MELEBIHI PANJANG MAKA AKAN MEMANJANG OTOMATIS
+				while (len < panjang-1) {				
+					len = strKode.length();
+					strKode = "0" + strKode;
+				}
+				strKode = prefix + strKode;
+				//INTINYA
+				newKode = strKode;
+				
+				//JIKA TIDAK ADA YANG SAMA MAKA BERHENTI
+				Bukugiro bukuGiro = new Bukugiro();
+				List<Bukugiro> listBukugiro = new ArrayList<Bukugiro>();
+				listBukugiro = bukuGiroService.findAllById(newKode, division.getId());
+				
+				if (listBukugiro.size()==0){
+					kodeKembar = false;
+				}
+				
+				//GAK TAHU KENAPA KOK GAK MAU ANGKA 2
+				if (strKode.equals("2")) {
+					kodeKembar = false;
+				}
 			}
 		}
 		//Rubah nilai SYSVAR BARU di database donk
@@ -346,41 +351,44 @@ public class TransaksiHelper {
 			baru=false;
 		}
 		
-		boolean kodeKembar = true;
-		while (kodeKembar==true){
-			//1. Jadikan integer dan tambah satu
-			//2. Tambah panjang sampai 7 dan tambah prefix
-			//3. CEK >> DATABASE >> JIKA TIDAK KEMBAR MAKA KEMBAR FALSE
-			int intKode = Integer.valueOf(newKode);
-			intKode +=1;
-			String strKode = String.valueOf(intKode);
-			
-			int len = 0;
-			//JIKA MELEBIHI PANJANG MAKA AKAN MEMANJANG OTOMATIS
-			while (len < panjang-1) {				
-				len = strKode.length();
-				strKode = "0" + strKode;
+		//ULANG SAMPAI TIDAK ADA YANG KEMBAR >> JIKA NAIK SATU TIDAK KEMBAR MAKA ITU NOMOR SEKARANG
+		if (arpaymentHeaderService.count()>0){
+			boolean kodeKembar = true;
+			while (kodeKembar==true){
+				//1. Jadikan integer dan tambah satu
+				//2. Tambah panjang sampai 7 dan tambah prefix
+				//3. CEK >> DATABASE >> JIKA TIDAK KEMBAR MAKA KEMBAR FALSE
+				int intKode = Integer.valueOf(newKode);
+				intKode +=1;
+				String strKode = String.valueOf(intKode);
+				
+				int len = 0;
+				//JIKA MELEBIHI PANJANG MAKA AKAN MEMANJANG OTOMATIS
+				while (len < panjang-1) {				
+					len = strKode.length();
+					strKode = "0" + strKode;
+				}
+				strKode = prefix + strKode;
+				//INTINYA
+				newKode = strKode;
+				
+				//JIKA TIDAK ADA YANG SAMA MAKA BERHENTI
+				Bukutransfer bukuTransfer = new Bukutransfer();
+	//			bukuTransfer = bukuTransferService.findById(newKode);
+				List<Bukutransfer> listBukutransfer = new ArrayList<Bukutransfer>();
+				listBukutransfer = bukuTransferService.findAllById(newKode, division.getId());
+				
+				if (listBukutransfer.size()==0){
+					kodeKembar = false;
+				}
+				
+				
+				//GAK TAHU KENAPA KOK GAK MAU ANGKA 2
+				if (strKode.equals("2")) {
+					kodeKembar = false;
+				}
 			}
-			strKode = prefix + strKode;
-			//INTINYA
-			newKode = strKode;
-			
-			//JIKA TIDAK ADA YANG SAMA MAKA BERHENTI
-			Bukutransfer bukuTransfer = new Bukutransfer();
-//			bukuTransfer = bukuTransferService.findById(newKode);
-			List<Bukutransfer> listBukutransfer = new ArrayList<Bukutransfer>();
-			listBukutransfer = bukuTransferService.findAllById(newKode, division.getId());
-			
-			if (listBukutransfer.size()==0){
-				kodeKembar = false;
-			}
-			
-			
-			//GAK TAHU KENAPA KOK GAK MAU ANGKA 2
-			if (strKode.equals("2")) {
-				kodeKembar = false;
-			}
-		}
+		}	
 		//Rubah nilai SYSVAR BARU di database donk
 		sysvar.setNilaiString1(newKode);
 		sysvarService.updateObject(sysvar);
@@ -388,7 +396,6 @@ public class TransaksiHelper {
 		return newKode;
 	}
 	
-
 	public String getCurrentNomorUrutBukuKasBesar(Division division){
 		String nomorUrutSekarang = "0000001";
 		int panjang = 7;
@@ -459,40 +466,43 @@ public class TransaksiHelper {
 			baru=false;
 		}
 		
-		boolean kodeKembar = true;
-		while (kodeKembar==true){
-			//1. Jadikan integer dan tambah satu
-			//2. Tambah panjang sampai 7 dan tambah prefix
-			//3. CEK >> DATABASE >> JIKA TIDAK KEMBAR MAKA KEMBAR FALSE
-			int intKode = Integer.valueOf(newKode);
-			intKode +=1;
-			String strKode = String.valueOf(intKode);
-			
-			int len = 0;
-			//JIKA MELEBIHI PANJANG MAKA AKAN MEMANJANG OTOMATIS
-			while (len < panjang-1) {				
-				len = strKode.length();
-				strKode = "0" + strKode;
-			}
-			strKode = prefix + strKode;
-			//INTINYA
-			newKode = strKode;
-			
-			//3. ** POINT GANTI (TIGA BUAH BARIS)
-			//JIKA TIDAK ADA YANG SAMA MAKA BERHENTI
-			Bkbheader item = new Bkbheader();
-//			bukuTransfer = bukuTransferService.findById(newKode);
-			List<Bkbheader> listItem = new ArrayList<Bkbheader>();
-			listItem = bkbHeaderService.findAll(newKode, division.getId());
-			
-			if (listItem.size()==0){
-				kodeKembar = false;
-			}
-			
-			
-			//GAK TAHU KENAPA KOK GAK MAU ANGKA 2
-			if (strKode.equals("2")) {
-				kodeKembar = false;
+		//ULANG SAMPAI TIDAK ADA YANG KEMBAR >> JIKA NAIK SATU TIDAK KEMBAR MAKA ITU NOMOR SEKARANG
+		if (arpaymentHeaderService.count()>0){
+			boolean kodeKembar = true;
+			while (kodeKembar==true){
+				//1. Jadikan integer dan tambah satu
+				//2. Tambah panjang sampai 7 dan tambah prefix
+				//3. CEK >> DATABASE >> JIKA TIDAK KEMBAR MAKA KEMBAR FALSE
+				int intKode = Integer.valueOf(newKode);
+				intKode +=1;
+				String strKode = String.valueOf(intKode);
+				
+				int len = 0;
+				//JIKA MELEBIHI PANJANG MAKA AKAN MEMANJANG OTOMATIS
+				while (len < panjang-1) {				
+					len = strKode.length();
+					strKode = "0" + strKode;
+				}
+				strKode = prefix + strKode;
+				//INTINYA
+				newKode = strKode;
+				
+				//3. ** POINT GANTI (TIGA BUAH BARIS)
+				//JIKA TIDAK ADA YANG SAMA MAKA BERHENTI
+				Bkbheader item = new Bkbheader();
+	//			bukuTransfer = bukuTransferService.findById(newKode);
+				List<Bkbheader> listItem = new ArrayList<Bkbheader>();
+				listItem = bkbHeaderService.findAll(newKode, division.getId());
+				
+				if (listItem.size()==0){
+					kodeKembar = false;
+				}
+				
+				
+				//GAK TAHU KENAPA KOK GAK MAU ANGKA 2
+				if (strKode.equals("2")) {
+					kodeKembar = false;
+				}
 			}
 		}
 		//Rubah nilai SYSVAR BARU di database donk
@@ -572,39 +582,42 @@ public class TransaksiHelper {
 			baru=false;
 		}
 		
-		boolean kodeKembar = true;
-		while (kodeKembar==true){
-			//1. Jadikan integer dan tambah satu
-			//2. Tambah panjang sampai 7 dan tambah prefix
-			//3. CEK >> DATABASE >> JIKA TIDAK KEMBAR MAKA KEMBAR FALSE
-			int intKode = Integer.valueOf(newKode);
-			intKode +=1;
-			String strKode = String.valueOf(intKode);
-			
-			int len = 0;
-			//JIKA MELEBIHI PANJANG MAKA AKAN MEMANJANG OTOMATIS
-			while (len < panjang-1) {				
-				len = strKode.length();
-				strKode = "0" + strKode;
-			}
-			strKode = prefix + strKode;
-			//INTINYA
-			newKode = strKode;
-			
-			//3. ** POINT GANTI (TIGA BUAH BARIS)
-			//JIKA TIDAK ADA YANG SAMA MAKA BERHENTI
-			Bkkheader item = new Bkkheader();
-			List<Bkkheader> listItem = new ArrayList<Bkkheader>();
-			listItem = bkkHeaderService.findAll(newKode, division.getId());
-			
-			if (listItem.size()==0){
-				kodeKembar = false;
-			}
-			
-			
-			//GAK TAHU KENAPA KOK GAK MAU ANGKA 2
-			if (strKode.equals("2")) {
-				kodeKembar = false;
+		//ULANG SAMPAI TIDAK ADA YANG KEMBAR >> JIKA NAIK SATU TIDAK KEMBAR MAKA ITU NOMOR SEKARANG
+		if (arpaymentHeaderService.count()>0){
+			boolean kodeKembar = true;
+			while (kodeKembar==true){
+				//1. Jadikan integer dan tambah satu
+				//2. Tambah panjang sampai 7 dan tambah prefix
+				//3. CEK >> DATABASE >> JIKA TIDAK KEMBAR MAKA KEMBAR FALSE
+				int intKode = Integer.valueOf(newKode);
+				intKode +=1;
+				String strKode = String.valueOf(intKode);
+				
+				int len = 0;
+				//JIKA MELEBIHI PANJANG MAKA AKAN MEMANJANG OTOMATIS
+				while (len < panjang-1) {				
+					len = strKode.length();
+					strKode = "0" + strKode;
+				}
+				strKode = prefix + strKode;
+				//INTINYA
+				newKode = strKode;
+				
+				//3. ** POINT GANTI (TIGA BUAH BARIS)
+				//JIKA TIDAK ADA YANG SAMA MAKA BERHENTI
+				Bkkheader item = new Bkkheader();
+				List<Bkkheader> listItem = new ArrayList<Bkkheader>();
+				listItem = bkkHeaderService.findAll(newKode, division.getId());
+				
+				if (listItem.size()==0){
+					kodeKembar = false;
+				}
+				
+				
+				//GAK TAHU KENAPA KOK GAK MAU ANGKA 2
+				if (strKode.equals("2")) {
+					kodeKembar = false;
+				}
 			}
 		}
 		//Rubah nilai SYSVAR BARU di database donk
@@ -685,39 +698,42 @@ public class TransaksiHelper {
 			baru=false;
 		}
 		
-		boolean kodeKembar = true;
-		while (kodeKembar==true){
-			//1. Jadikan integer dan tambah satu
-			//2. Tambah panjang sampai 7 dan tambah prefix
-			//3. CEK >> DATABASE >> JIKA TIDAK KEMBAR MAKA KEMBAR FALSE
-			int intKode = Integer.valueOf(newKode);
-			intKode +=1;
-			String strKode = String.valueOf(intKode);
-			
-			int len = 0;
-			//JIKA MELEBIHI PANJANG MAKA AKAN MEMANJANG OTOMATIS
-			while (len < panjang-1) {				
-				len = strKode.length();
-				strKode = "0" + strKode;
-			}
-			strKode = prefix + strKode;
-			//INTINYA
-			newKode = strKode;
-			
-			//3. ** POINT GANTI (TIGA BUAH BARIS)
-			//JIKA TIDAK ADA YANG SAMA MAKA BERHENTI
-			Bbankheader item = new Bbankheader();
-			List<Bbankheader> listItem = new ArrayList<Bbankheader>();
-			listItem = bbankHeaderService.findAll(newKode, division.getId());
-			
-			if (listItem.size()==0){
-				kodeKembar = false;
-			}
-			
-			
-			//GAK TAHU KENAPA KOK GAK MAU ANGKA 2
-			if (strKode.equals("2")) {
-				kodeKembar = false;
+		//ULANG SAMPAI TIDAK ADA YANG KEMBAR >> JIKA NAIK SATU TIDAK KEMBAR MAKA ITU NOMOR SEKARANG
+		if (arpaymentHeaderService.count()>0){
+			boolean kodeKembar = true;
+			while (kodeKembar==true){
+				//1. Jadikan integer dan tambah satu
+				//2. Tambah panjang sampai 7 dan tambah prefix
+				//3. CEK >> DATABASE >> JIKA TIDAK KEMBAR MAKA KEMBAR FALSE
+				int intKode = Integer.valueOf(newKode);
+				intKode +=1;
+				String strKode = String.valueOf(intKode);
+				
+				int len = 0;
+				//JIKA MELEBIHI PANJANG MAKA AKAN MEMANJANG OTOMATIS
+				while (len < panjang-1) {				
+					len = strKode.length();
+					strKode = "0" + strKode;
+				}
+				strKode = prefix + strKode;
+				//INTINYA
+				newKode = strKode;
+				
+				//3. ** POINT GANTI (TIGA BUAH BARIS)
+				//JIKA TIDAK ADA YANG SAMA MAKA BERHENTI
+				Bbankheader item = new Bbankheader();
+				List<Bbankheader> listItem = new ArrayList<Bbankheader>();
+				listItem = bbankHeaderService.findAll(newKode, division.getId());
+				
+				if (listItem.size()==0){
+					kodeKembar = false;
+				}
+				
+				
+				//GAK TAHU KENAPA KOK GAK MAU ANGKA 2
+				if (strKode.equals("2")) {
+					kodeKembar = false;
+				}
 			}
 		}
 		//Rubah nilai SYSVAR BARU di database donk
@@ -730,14 +746,15 @@ public class TransaksiHelper {
 	public static void main(String [] args){
 		TransaksiHelper helper = new TransaksiHelper();
 		Division div = new Division();
-		div.setId("DIV1");
+		div.setId("DIV2");
 //		System.out.println(helper.getNewNomorUrutBukuGiro(div));
 //		System.out.println(helper.getNewNomorUrutBukuTransfer(div));
 		
-//		System.out.println(helper.getNewNomorUrutBukuKasBesar(div));
-//		System.out.println(helper.getNewNomorUrutBukuKasKecil(div));
-//		System.out.println(helper.getNewNomorUrutBukuBank(div));
+		System.out.println(helper.getNewNomorUrutBukuKasBesar(div));
+		System.out.println(helper.getNewNomorUrutBukuKasKecil(div));
+		System.out.println(helper.getNewNomorUrutBukuBank(div));
 		System.out.println(helper.getCurrentTanggalTransaksiBerjalan(div));
+		System.out.println(helper.getNewNomorUrutArPayment(div));
 		
 		
 	}

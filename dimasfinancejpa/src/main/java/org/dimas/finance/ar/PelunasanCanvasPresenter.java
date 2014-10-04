@@ -9,6 +9,7 @@ import org.dimas.finance.model.Arinvoice;
 import org.dimas.finance.model.Arpaymentdetail;
 import org.dimas.finance.model.ArpaymentdetailPK;
 import org.dimas.finance.model.Arpaymentheader;
+import org.dimas.finance.model.ArpaymentheaderPK;
 import org.dimas.finance.model.Division;
 import org.dimas.finance.model.Salesman;
 import org.dimas.finance.model.modelenum.EnumFormOperationStatus;
@@ -205,6 +206,7 @@ public class PelunasanCanvasPresenter implements ClickListener, ValueChangeListe
 	public int searchForm(){
 		//1. Remove filter dan Refresh container dalulu dahulu
 //		//SELALU TUNAI
+		model.getTableJpaContainer().refresh();
 		model.getTableJpaContainer().removeAllContainerFilters();
 		model.setFilterDefaultJpaContainer();
 		
@@ -336,11 +338,15 @@ public class PelunasanCanvasPresenter implements ClickListener, ValueChangeListe
 	public void lunaskan(){
 		
 			try{
-				
-				String newRefno = model.getManagerTransaksi().getNewNomorUrutArPayment();
+				String newNomorUrut ="";
+//				String newNomorUrut = model.getManagerTransaksi().getNewNomorUrutArPayment();
 				//1. BUAT HEADER
 				Arpaymentheader itemHeader = new Arpaymentheader();
-				itemHeader.setRefno(newRefno);
+				ArpaymentheaderPK id = new ArpaymentheaderPK();
+				id.setRefno(newNomorUrut);
+				
+//				itemHeader.setRefno(newNomorUrut);
+				itemHeader.setId(id);
 				itemHeader.setEntrydate(new Date());
 				itemHeader.setTransdate(new Date());
 				itemHeader.setUserid("admin");
@@ -363,7 +369,7 @@ public class PelunasanCanvasPresenter implements ClickListener, ValueChangeListe
 						Arpaymentdetail itemDetail = new Arpaymentdetail();
 						
 						ArpaymentdetailPK itemDetailPK = new ArpaymentdetailPK();
-						itemDetailPK.setRefno(newRefno);
+						itemDetailPK.setRefno(newNomorUrut);
 						itemDetailPK.setInvoiceno(item.getId().getInvoiceno());
 						itemDetailPK.setDivision(item.getId().getDivision());
 						nomorUrut++;

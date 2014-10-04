@@ -374,6 +374,7 @@ public class AreaPresenter implements ClickListener, ValueChangeListener, Handle
 	}
 	public int searchForm(){
 		//1. Remove filter dan Refresh container dalulu dahulu
+		model.getTableJpaContainer().refresh();
 		model.getTableJpaContainer().removeAllContainerFilters();
 		
 		//2. Baru Kasih Filter Lagi

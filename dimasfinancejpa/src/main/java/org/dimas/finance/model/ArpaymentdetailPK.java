@@ -15,6 +15,7 @@ public class ArpaymentdetailPK implements Serializable {
 	//default serial version id, required for serializable classes.
 	private static final long serialVersionUID = 1L;
 
+	
 	@Column(name="REFNO")
 	private String refno;
 	

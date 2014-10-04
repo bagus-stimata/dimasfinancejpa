@@ -7,6 +7,7 @@ import org.dimas.finance.model.Arinvoice;
 import org.dimas.finance.model.Arpaymentdetail;
 import org.dimas.finance.model.ArpaymentdetailPK;
 import org.dimas.finance.model.Arpaymentheader;
+import org.dimas.finance.model.ArpaymentheaderPK;
 import org.dimas.finance.model.modelenum.EnumFormOperationStatus;
 import org.dimas.finance.model.modelenum.EnumHelpOverlayTipe;
 import org.dimas.finance.util.HelpManager;
@@ -223,6 +224,7 @@ public class CustomerCreditPresenter implements ClickListener, ValueChangeListen
 	
 																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																									
 	public int searchForm(){
+		model.getTableJpaContainer().refresh();
 		//1. Remove filter dan Refresh container dalulu dahulu
 		model.getTableJpaContainer().removeAllContainerFilters();
 		
@@ -376,10 +378,15 @@ public class CustomerCreditPresenter implements ClickListener, ValueChangeListen
 	public void lunaskan(){
 		
 		try{
-			String newNomorUrut = model.getManagerTransaksi().getNewNomorUrutArPayment();
+			String newNomorUrut="";
+//			String newNomorUrut = model.getManagerTransaksi().getNewNomorUrutArPayment();
 			//1. BUAT HEADER
 			Arpaymentheader itemHeader = new Arpaymentheader();
-			itemHeader.setRefno(newNomorUrut);
+			ArpaymentheaderPK id = new ArpaymentheaderPK();
+			id.setRefno(newNomorUrut);
+			
+//			itemHeader.setRefno(newNomorUrut);
+			itemHeader.setId(id);
 			itemHeader.setEntrydate(new Date());
 			itemHeader.setTransdate(new Date());
 			itemHeader.setUserid("admin");

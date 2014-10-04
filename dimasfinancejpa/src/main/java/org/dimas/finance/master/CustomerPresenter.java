@@ -387,6 +387,7 @@ public class CustomerPresenter implements ClickListener, ValueChangeListener, Ha
 	}
 	public int searchForm(){
 		//1. Remove filter dan Refresh container dalulu dahulu
+		model.getTableJpaContainer().refresh();
 		model.getTableJpaContainer().removeAllContainerFilters();
 		
 		//2. Baru Kasih Filter Lagi

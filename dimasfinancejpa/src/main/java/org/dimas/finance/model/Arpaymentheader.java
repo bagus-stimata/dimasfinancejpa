@@ -18,10 +18,9 @@ import java.util.Set;
 public class Arpaymentheader implements Serializable {
 	private static final long serialVersionUID = 1L;
 
-	@Id
-	@Column(name="REFNO")
-	private String refno;
-
+	@EmbeddedId
+	protected ArpaymentheaderPK id;
+	
 	@Column(name="CLOSING")
 	private boolean closing;
 
@@ -42,24 +41,17 @@ public class Arpaymentheader implements Serializable {
 	@OneToMany(mappedBy="arpaymentheaderBean")
 	private Set<Arpaymentdetail> arpaymentdetails;
 	
-	
-	public Set<Arpaymentdetail> getArpaymentdetails() {
-		return arpaymentdetails;
+	//bi-directional many-to-one association to Division
+	@ManyToOne
+	@JoinColumn(name="division", referencedColumnName = "id")
+	private Division divisionBean;
+
+	public ArpaymentheaderPK getId() {
+		return id;
 	}
 
-	public void setArpaymentdetails(Set<Arpaymentdetail> arpaymentdetails) {
-		this.arpaymentdetails = arpaymentdetails;
-	}
-
-	public Arpaymentheader() {
-	}
-
-	public String getRefno() {
-		return this.refno;
-	}
-
-	public void setRefno(String refno) {
-		this.refno = refno;
+	public void setId(ArpaymentheaderPK id) {
+		this.id = id;
 	}
 
 	public boolean isClosing() {
@@ -71,7 +63,7 @@ public class Arpaymentheader implements Serializable {
 	}
 
 	public Date getEntrydate() {
-		return this.entrydate;
+		return entrydate;
 	}
 
 	public void setEntrydate(Date entrydate) {
@@ -79,7 +71,7 @@ public class Arpaymentheader implements Serializable {
 	}
 
 	public String getNotes() {
-		return this.notes;
+		return notes;
 	}
 
 	public void setNotes(String notes) {
@@ -87,7 +79,7 @@ public class Arpaymentheader implements Serializable {
 	}
 
 	public Date getTransdate() {
-		return this.transdate;
+		return transdate;
 	}
 
 	public void setTransdate(Date transdate) {
@@ -95,31 +87,38 @@ public class Arpaymentheader implements Serializable {
 	}
 
 	public String getUserid() {
-		return this.userid;
+		return userid;
 	}
 
 	public void setUserid(String userid) {
 		this.userid = userid;
 	}
-	public Arpaymentdetail addArpaymentdetail(Arpaymentdetail arpaymentdetail) {
-		getArpaymentdetails().add(arpaymentdetail);
-		arpaymentdetail.setArpaymentheaderBean(this);
-		
-		return arpaymentdetail;
+
+	public Set<Arpaymentdetail> getArpaymentdetails() {
+		return arpaymentdetails;
 	}
 
-	public Arpaymentdetail removeArpaymentdetail(Arpaymentdetail arpaymentdetail) {
-		getArpaymentdetails().remove(arpaymentdetail);
-		arpaymentdetail.setArpaymentheaderBean(null);
+	public void setArpaymentdetails(Set<Arpaymentdetail> arpaymentdetails) {
+		this.arpaymentdetails = arpaymentdetails;
+	}
 
-		return arpaymentdetail;
+	public Division getDivisionBean() {
+		return divisionBean;
+	}
+
+	public void setDivisionBean(Division divisionBean) {
+		this.divisionBean = divisionBean;
+	}
+
+	public static long getSerialversionuid() {
+		return serialVersionUID;
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((refno == null) ? 0 : refno.hashCode());
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
 		return result;
 	}
 
@@ -132,18 +131,14 @@ public class Arpaymentheader implements Serializable {
 		if (getClass() != obj.getClass())
 			return false;
 		Arpaymentheader other = (Arpaymentheader) obj;
-		if (refno == null) {
-			if (other.refno != null)
+		if (id == null) {
+			if (other.id != null)
 				return false;
-		} else if (!refno.equals(other.refno))
+		} else if (!id.equals(other.id))
 			return false;
 		return true;
 	}
-
-	@Override
-	public String toString() {
-		return "" + refno ;
-	}
+	
 	
 
 }

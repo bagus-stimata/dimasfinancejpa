@@ -186,6 +186,7 @@ public class PelunasanTunaiModel implements Serializable{
 		//SELALU TUNAI
 		//CANVAS SELALU TUNAI
 		//TUNAI KREDIT TIDAK VALID
+		//HARUS SUDAH KIRIM
 //		Filter filter =  new SimpleStringFilter("tunaikredit","T", true, false);
 //		getTableJpaContainer().addContainerFilter(filter);
 		
@@ -194,6 +195,10 @@ public class PelunasanTunaiModel implements Serializable{
 				
 		Filter filter02 = new Or(new Compare.Equal("term", 1)); 
 		getTableJpaContainer().addContainerFilter(filter02);
+		
+		Filter filter03 = new Or(new Compare.Equal("terkirim", true)); 
+		getTableJpaContainer().addContainerFilter(filter03);
+		
 		
 	}
 	public void setFreshDataForm(){

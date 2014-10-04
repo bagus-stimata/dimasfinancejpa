@@ -376,6 +376,7 @@ public class BukuTransferPresenter implements ClickListener, ValueChangeListener
 	
 	public int searchForm(){
 		//1. Remove filter dan Refresh container dalulu dahulu
+		model.reload();
 		model.getBeanItemContainerBukutransfer().removeAllContainerFilters();
 		
 		//2. Baru Kasih Filter Lagi
