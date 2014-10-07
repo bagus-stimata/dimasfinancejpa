@@ -60,11 +60,11 @@ public class PenandaanTTDModel implements Serializable{
 	private DivisionJpaService divisionService;
 	private SalesmanJpaService salesmanService;
 	
-	private JPAContainer<Arinvoice> tableJpaContainer;	
+//	private JPAContainer<Arinvoice> tableJpaContainer;	
 	
 	public BeanItem<Arinvoice> formBeanItem;	
 	private List<Arinvoice> tableList;
-//	private BeanItemContainer<Arinvoice> tableBeanItemContainer;
+	private BeanItemContainer<Arinvoice> tableBeanItemContainer;
 	
 	private BeanItemContainer<Division> beanItemContainerDivision;
 	private BeanItemContainer<Salesman> beanItemContainerSalesman;
@@ -79,6 +79,7 @@ public class PenandaanTTDModel implements Serializable{
 		initVariableData();
 	}
 	public void initVariable(){
+		tableBeanItemContainer = new BeanItemContainer<Arinvoice>(Arinvoice.class);
 		beanItemContainerDivision = new BeanItemContainer<Division>(Division.class);
 		beanItemContainerSalesman = new BeanItemContainer<Salesman>(Salesman.class);
 		
@@ -91,27 +92,14 @@ public class PenandaanTTDModel implements Serializable{
 		
 	}
 	
-	public ArPaymentHeaderJpaService getArpaymentHeaderService() {
-		return arpaymentHeaderService;
-	}
-	public void setArpaymentHeaderService(
-			ArPaymentHeaderJpaService arpaymentHeaderService) {
-		this.arpaymentHeaderService = arpaymentHeaderService;
-	}
-	public ArPaymentDetailJpaService getArpaymentDetailService() {
-		return arpaymentDetailService;
-	}
-	public void setArpaymentDetailService(
-			ArPaymentDetailJpaService arpaymentDetailService) {
-		this.arpaymentDetailService = arpaymentDetailService;
-	}
 	public void initVariableData(){
 		System.out.println("Init >> PenandaanKirimModel >> initData");		
 		//TABLE
 		tableList = new ArrayList<Arinvoice>();
 
-		tableJpaContainer =  JPAContainerFactory.make(Arinvoice.class, persistenceUnit);
-		setFilterDefaultJpaContainer();
+//		tableJpaContainer =  JPAContainerFactory.make(Arinvoice.class, persistenceUnit);
+		tableBeanItemContainer.addAll(arInvoiceService.findAll());
+		setFilterDefaultBeanItemContainer();
 		
 		//COMBOBOX DIVISION
 		beanItemContainerDivision.addAll(divisionService.findAll());
@@ -121,11 +109,11 @@ public class PenandaanTTDModel implements Serializable{
 	};
 
 	public void setCurrentContainerUncheck(){
-		Collection itemIds = getTableJpaContainer().getItemIds();
+
+		Collection itemIds = tableBeanItemContainer.getItemIds();
 		for (Object itemId: itemIds){
-			getTableJpaContainer().getItem(itemId).getEntity().getSelected().setValue(false);
+			tableBeanItemContainer.getItem(itemId).getBean().getSelected().setValue(false);
 		}
-		
 	}
 	
 	public ArInvoiceSelected convertArInvoiceToSelected(Arinvoice arInvoice){
@@ -164,27 +152,25 @@ public class PenandaanTTDModel implements Serializable{
 		
 		return item;
 	}
-	public void setFreshDataTable(){	
-		getTableJpaContainer().removeAllContainerFilters();
-		getTableJpaContainer().refresh();
+	public void setFreshDataBeanItemContainer(){
+		tableBeanItemContainer.removeAllItems();
+		tableBeanItemContainer.removeAllContainerFilters();
+		tableBeanItemContainer.addAll(arInvoiceService.findAll());
+
 	}
-	public void setFilterDefaultJpaContainer(){
+	public void setFilterDefaultBeanItemContainer(){
 		//FILTER KRITERIA:
 		//1. Semua Invoice yang belum dilunasi
 		//2. Bukan Canvas
 		//3. Belum Terkirim
 		Filter filter = new Not(new Compare.Equal("lunas", true));
-		getTableJpaContainer().addContainerFilter(filter);
+		tableBeanItemContainer.addContainerFilter(filter);
 		
 		Filter filterNotCanvas = new Not(new SimpleStringFilter("tipejual", "C", true, false));
-		getTableJpaContainer().addContainerFilter(filterNotCanvas);
+		tableBeanItemContainer.addContainerFilter(filterNotCanvas);
 		
 		Filter filterBelumTerkirim = new Compare.Equal("terkirim", false);
-		getTableJpaContainer().addContainerFilter(filterBelumTerkirim);
-		
-	}
-	public void setFreshDataForm(){
-		
+		tableBeanItemContainer.addContainerFilter(filterBelumTerkirim);
 	}
 
 	public Arinvoice getItem() {
@@ -244,11 +230,13 @@ public class PenandaanTTDModel implements Serializable{
 	public String getOperationStatus() {
 		return operationStatus;
 	}
-	public JPAContainer<Arinvoice> getTableJpaContainer() {
-		return tableJpaContainer;
+	
+	public BeanItemContainer<Arinvoice> getTableBeanItemContainer() {
+		return tableBeanItemContainer;
 	}
-	public void setTableJpaContainer(JPAContainer<Arinvoice> tableJpaContainer) {
-		this.tableJpaContainer = tableJpaContainer;
+	public void setTableBeanItemContainer(
+			BeanItemContainer<Arinvoice> tableBeanItemContainer) {
+		this.tableBeanItemContainer = tableBeanItemContainer;
 	}
 	public SalesmanJpaService getSalesmanService() {
 		return salesmanService;
@@ -276,6 +264,20 @@ public class PenandaanTTDModel implements Serializable{
 		this.managerTransaksi = managerTransaksi;
 	}
 
+	public ArPaymentHeaderJpaService getArpaymentHeaderService() {
+		return arpaymentHeaderService;
+	}
+	public void setArpaymentHeaderService(
+			ArPaymentHeaderJpaService arpaymentHeaderService) {
+		this.arpaymentHeaderService = arpaymentHeaderService;
+	}
+	public ArPaymentDetailJpaService getArpaymentDetailService() {
+		return arpaymentDetailService;
+	}
+	public void setArpaymentDetailService(
+			ArPaymentDetailJpaService arpaymentDetailService) {
+		this.arpaymentDetailService = arpaymentDetailService;
+	}
 
 	
 }

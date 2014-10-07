@@ -1,4 +1,4 @@
-package org.dimas.finance.warehouse;
+package org.dimas.finance.warehouse.tunaiorkredit;
 
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
@@ -8,12 +8,17 @@ import java.util.Date;
 import org.dimas.finance.model.Arinvoice;
 import org.dimas.finance.model.modelenum.EnumFormOperationStatus;
 import org.dimas.finance.util.HelpManager;
+import org.dimas.finance.warehouse.WhRecapSelectModel;
+import org.dimas.finance.warehouse.WhRecapSelectPresenter;
+import org.dimas.finance.warehouse.WhRecapSelectView;
+import org.hibernate.annotations.Check;
 
 import com.vaadin.addon.jpacontainer.fieldfactory.FieldFactory;
 import com.vaadin.data.Property;
 import com.vaadin.ui.AbstractSelect.ItemCaptionMode;
 import com.vaadin.ui.Alignment;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.CheckBox;
 import com.vaadin.ui.ComboBox;
 import com.vaadin.ui.CustomComponent;
 import com.vaadin.ui.DateField;
@@ -29,9 +34,9 @@ import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.VerticalSplitPanel;
 import com.vaadin.ui.themes.Reindeer;
 
-public class PenandaanKirimView extends CustomComponent {
+public class PenandaanTunaiOrKreditView extends CustomComponent {
 	
-	private PenandaanKirimModel model;
+	private PenandaanTunaiOrKreditModel model;
 	private VerticalLayout content = new VerticalLayout();
 	
 	private Table table;
@@ -50,20 +55,23 @@ public class PenandaanKirimView extends CustomComponent {
 	private TextField fieldSearchByInvoice;	
 	private ComboBox fieldSearchComboTerkirim;
 	
+	private ComboBox fieldSearchComboTunaiKredit = new ComboBox("T/K");
+	private CheckBox checkTunai = new CheckBox("Tunai");
+	
 	private ComboBox fieldSearchComboSalesman;	
 	
 	private DateField fieldSearchByDateInvoiceFrom;
 	private DateField fieldSearchByDateInvoiceTo;
 
-	private Button btnSearch;
-	private Button btnReload;
-	private Button btnSetKirim;
-	private Button btnBatalKirim;
+	private Button btnSearch = new Button("Reload");
+	private Button btnReload = new Button("Search");
+	private Button btnSetTunai = new Button("set TUNAI");
+	private Button btnSetKredit = new Button("set KREDIT");
 	
-	private Button btnPrint;
-	private Button btnHelp;	
-	private Button btnSeparator1;
-	private Button btnSeparator2;
+	private Button btnPrint= new Button("Print");
+	private Button btnHelp = new Button("Help");	
+	private Button btnSeparator1 = new Button("");
+	private Button btnSeparator2 = new Button("::");
 	
 	//Panel
 	private Panel panelUtama;
@@ -87,7 +95,7 @@ public class PenandaanKirimView extends CustomComponent {
     private TextField fieldAmountSum= new TextField("Nilai Faktur(TO+CVS): ");
     private TextField fieldAmountPaySum = new TextField("BAYAR: ");
 	
-	public PenandaanKirimView(PenandaanKirimModel model){
+	public PenandaanTunaiOrKreditView(PenandaanTunaiOrKreditModel model){
 		this.model = model;
 		initComponent();
 		initFieldFactory();
@@ -151,6 +159,7 @@ public class PenandaanKirimView extends CustomComponent {
 		fieldSearchComboTerkirim.setItemCaptionMode(ItemCaptionMode.EXPLICIT_DEFAULTS_ID);				
 		fieldSearchComboTerkirim.setNullSelectionAllowed(false);
 		
+
 		//FOOTER SELECTED
 		fieldSelectedCount.setWidth("100px");
 		fieldTunaiCount.setWidth("50px");
@@ -179,23 +188,12 @@ public class PenandaanKirimView extends CustomComponent {
 //		commit = new Button("Save");		
 //		discard = new Button("Cancel");
 		
-		btnSearch = new Button("Search");
 		btnSearch.setStyleName(Reindeer.BUTTON_SMALL);
-		btnReload = new Button("Reload");
 		btnReload.setStyleName(Reindeer.BUTTON_SMALL);
-		btnSetKirim = new Button("Tandai KIRIM");
-		btnSetKirim.setStyleName(Reindeer.BUTTON_SMALL);
-		btnBatalKirim = new Button("BATAL!!");
-		btnBatalKirim.setStyleName(Reindeer.BUTTON_SMALL);
+		btnSetTunai.setStyleName(Reindeer.BUTTON_SMALL);
+		btnSetKredit.setStyleName(Reindeer.BUTTON_SMALL);
 		
-		
-		
-		btnPrint = new Button("Print");
-		btnHelp = new Button("Help");
-		
-		btnSeparator1 = new Button("");
 		btnSeparator1.setEnabled(false);
-		btnSeparator2 = new Button("::");
 		btnSeparator2.setEnabled(false);
 		
 		//Init komponen bawah
@@ -241,6 +239,10 @@ public class PenandaanKirimView extends CustomComponent {
 		layoutTopInner.addComponent(fieldSearchByInvoice);	
 		layoutTopInner.addComponent(fieldSearchComboSalesman);
 		layoutTopInner.addComponent(fieldSearchComboTerkirim);
+
+		layoutTopInner.addComponent(fieldSearchComboTunaiKredit);
+		layoutTopInner.addComponent(checkTunai);
+		layoutTopInner.setComponentAlignment(checkTunai, Alignment.BOTTOM_CENTER);
 		
 		layoutTopInner.addComponent(fieldSearchByDateInvoiceFrom);
 		layoutTopInner.addComponent(fieldSearchByDateInvoiceTo);
@@ -250,10 +252,10 @@ public class PenandaanKirimView extends CustomComponent {
 		layoutTopInner.setComponentAlignment(btnSearch, Alignment.BOTTOM_CENTER);
 		layoutTopInner.addComponent(btnSeparator1);
 		layoutTopInner.setComponentAlignment(btnSeparator1, Alignment.BOTTOM_CENTER);
-		layoutTopInner.addComponent(btnSetKirim);
-		layoutTopInner.setComponentAlignment(btnSetKirim, Alignment.BOTTOM_CENTER);
-		layoutTopInner.addComponent(btnBatalKirim);
-		layoutTopInner.setComponentAlignment(btnBatalKirim, Alignment.BOTTOM_CENTER);
+		layoutTopInner.addComponent(btnSetTunai);
+		layoutTopInner.setComponentAlignment(btnSetTunai, Alignment.BOTTOM_CENTER);
+		layoutTopInner.addComponent(btnSetKredit);
+		layoutTopInner.setComponentAlignment(btnSetKredit, Alignment.BOTTOM_CENTER);
 		
 		
 		//KOMPONEN TENGAH
@@ -300,7 +302,7 @@ public class PenandaanKirimView extends CustomComponent {
 		
 		//VISIBLE COMPONEN
 		fieldAmountPaySum.setVisible(false);
-		
+		checkTunai.setVisible(false);
 	}
 	
 	public void setVisibleTableProperties(Object... tablePropertyIds) {
@@ -412,7 +414,25 @@ public class PenandaanKirimView extends CustomComponent {
 		fieldSearchComboTerkirim.setWidth("70px");
 
 		//DEFAULT VIEW
-		fieldSearchComboTerkirim.select("B");
+		fieldSearchComboTerkirim.select("K");
+		fieldSearchComboTerkirim.setEnabled(false);
+		fieldSearchComboTerkirim.setNullSelectionAllowed(false);
+		
+		//TUNAI KREDIT
+		fieldSearchComboTunaiKredit.addItem("T");
+		fieldSearchComboTunaiKredit.setItemCaption("T", "Tunai");
+		fieldSearchComboTunaiKredit.addItem("K");
+		fieldSearchComboTunaiKredit.setItemCaption("K", "Kredit");
+		fieldSearchComboTunaiKredit.addItem("S");
+		fieldSearchComboTunaiKredit.setItemCaption("S", "Semua");
+		fieldSearchComboTunaiKredit.setStyleName(Reindeer.TEXTFIELD_SMALL);
+		fieldSearchComboTunaiKredit.setWidth("70px");
+
+		//DEFAULT VIEW
+		fieldSearchComboTunaiKredit.select("T");
+		fieldSearchComboTunaiKredit.setEnabled(true);
+		fieldSearchComboTunaiKredit.setNullSelectionAllowed(false);
+		
 		
 	}
 	
@@ -584,11 +604,11 @@ public class PenandaanKirimView extends CustomComponent {
 	}
 	
 	
-	public PenandaanKirimModel getModel() {
+	public PenandaanTunaiOrKreditModel getModel() {
 		return model;
 	}
 
-	public void setModel(PenandaanKirimModel model) {
+	public void setModel(PenandaanTunaiOrKreditModel model) {
 		this.model = model;
 	}
 
@@ -721,20 +741,21 @@ public class PenandaanKirimView extends CustomComponent {
 		this.btnReload = btnReload;
 	}
 
-	public Button getBtnSetKirim() {
-		return btnSetKirim;
+
+	public Button getBtnSetTunai() {
+		return btnSetTunai;
 	}
 
-	public void setBtnSetKirim(Button btnSetKirim) {
-		this.btnSetKirim = btnSetKirim;
+	public void setBtnSetTunai(Button btnSetTunai) {
+		this.btnSetTunai = btnSetTunai;
 	}
 
-	public Button getBtnBatalKirim() {
-		return btnBatalKirim;
+	public Button getBtnSetKredit() {
+		return btnSetKredit;
 	}
 
-	public void setBtnBatalKirim(Button btnBatalKirim) {
-		this.btnBatalKirim = btnBatalKirim;
+	public void setBtnSetKredit(Button btnSetKredit) {
+		this.btnSetKredit = btnSetKredit;
 	}
 
 	public Button getBtnPrint() {
@@ -927,6 +948,22 @@ public class PenandaanKirimView extends CustomComponent {
 
 	public void setRecapSelectView(WhRecapSelectView recapSelectView) {
 		this.recapSelectView = recapSelectView;
+	}
+
+	public CheckBox getCheckTunai() {
+		return checkTunai;
+	}
+
+	public void setCheckTunai(CheckBox checkTunai) {
+		this.checkTunai = checkTunai;
+	}
+
+	public ComboBox getFieldSearchComboTunaiKredit() {
+		return fieldSearchComboTunaiKredit;
+	}
+
+	public void setFieldSearchComboTunaiKredit(ComboBox fieldSearchComboTunaiKredit) {
+		this.fieldSearchComboTunaiKredit = fieldSearchComboTunaiKredit;
 	}
 	
 	   

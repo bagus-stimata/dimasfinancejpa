@@ -1,11 +1,10 @@
-package org.dimas.finance.warehouse;
+package org.dimas.finance.ar.canvas;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.apache.commons.digester.rss.Item;
 import org.dimas.finance.jpa.dao.ArInvoiceJpaService;
 import org.dimas.finance.jpa.dao.ArInvoiceJpaServiceImpl;
 import org.dimas.finance.jpa.dao.ArPaymentDetailJpaService;
@@ -17,33 +16,21 @@ import org.dimas.finance.jpa.dao.DivisionJpaServiceImpl;
 import org.dimas.finance.jpa.dao.SalesmanJpaService;
 import org.dimas.finance.jpa.dao.SalesmanJpaServiceImpl;
 import org.dimas.finance.model.ArInvoiceSelected;
-import org.dimas.finance.model.ArInvoiceSelected;
-import org.dimas.finance.model.ArInvoiceSelected;
 import org.dimas.finance.model.Arinvoice;
-import org.dimas.finance.model.Arpaymentdetail;
-import org.dimas.finance.model.Arpaymentheader;
 import org.dimas.finance.model.Division;
-import org.dimas.finance.model.Region;
 import org.dimas.finance.model.Salesman;
-import org.dimas.finance.util.Inject;
 import org.dimas.finance.util.TransaksiHelper;
-import org.eclipse.persistence.jpa.jpql.utility.filter.NullFilter;
 
 import com.vaadin.addon.jpacontainer.JPAContainer;
 import com.vaadin.addon.jpacontainer.JPAContainerFactory;
 import com.vaadin.data.Container.Filter;
 import com.vaadin.data.util.BeanItem;
 import com.vaadin.data.util.BeanItemContainer;
-import com.vaadin.data.util.filter.And;
 import com.vaadin.data.util.filter.Compare;
-import com.vaadin.data.util.filter.IsNull;
-import com.vaadin.data.util.filter.Like;
-import com.vaadin.data.util.filter.Not;
 import com.vaadin.data.util.filter.Or;
 import com.vaadin.data.util.filter.SimpleStringFilter;
-import com.vaadin.data.util.filter.Compare.Equal;
 
-public class PenandaanKirimModel implements Serializable{
+public class PelunasanCanvasModel implements Serializable{
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -72,9 +59,10 @@ public class PenandaanKirimModel implements Serializable{
 	private String operationStatus;
 	//CHECK BOX BUAT TABLE PADA HEADER
 	private boolean selectAllInvoice;
+	
 	private TransaksiHelper managerTransaksi = new TransaksiHelper();
 	
-	public PenandaanKirimModel(){
+	public PelunasanCanvasModel(){
 		initVariable();		
 		initVariableData();
 	}
@@ -93,7 +81,7 @@ public class PenandaanKirimModel implements Serializable{
 	}
 	
 	public void initVariableData(){
-		System.out.println("Init >> PenandaanKirimModel >> initData");		
+		System.out.println("Init >> CustomerCreditModel >> initData");		
 		//TABLE
 		tableList = new ArrayList<Arinvoice>();
 
@@ -107,15 +95,14 @@ public class PenandaanKirimModel implements Serializable{
 		beanItemContainerSalesman.addAll(salesmanService.findAll());
 		
 	};
-	public void setCurrentContainerUncheck(){
 
+	public void setCurrentContainerUncheck(){
 		Collection itemIds = tableBeanItemContainer.getItemIds();
 		for (Object itemId: itemIds){
 			tableBeanItemContainer.getItem(itemId).getBean().getSelected().setValue(false);
 		}
 		
 	}
-	
 	
 	public ArInvoiceSelected convertArInvoiceToSelected(Arinvoice arInvoice){
 		ArInvoiceSelected item = new ArInvoiceSelected();
@@ -160,17 +147,22 @@ public class PenandaanKirimModel implements Serializable{
 
 	}
 	public void setFilterDefaultBeanItemContainer(){
-		//FILTER KRITERIA:
-		//1. Semua Invoice yang belum dilunasi
-		//2. Bukan Canvas
-		Filter filter = new Not(new Compare.Equal("lunas", true));
-		tableBeanItemContainer.addContainerFilter(filter);
+		//SELALU TUNAI
+		//CANVAS SELALU TUNAI
+//		Filter filter =  new SimpleStringFilter("tunaikredit","T", true, false);
+//		getTableJpaContainer().addContainerFilter(filter);
 		
-		Filter filterNotCanvas = new Not(new SimpleStringFilter("tipejual", "C", true, false));
-		tableBeanItemContainer.addContainerFilter(filterNotCanvas);
+		Filter filter01 =  new SimpleStringFilter("tipejual","C", true, false);
+		tableBeanItemContainer.addContainerFilter(filter01);
+		
+		//TIDAK ADA CANVAS KREDIT
+		Filter filter02 = new Or(new Compare.Equal("term", 1)); 
+		tableBeanItemContainer.addContainerFilter(filter02);
+		
+		
 		
 	}
-	
+
 	public ArPaymentHeaderJpaService getArpaymentHeaderService() {
 		return arpaymentHeaderService;
 	}
@@ -185,7 +177,7 @@ public class PenandaanKirimModel implements Serializable{
 			ArPaymentDetailJpaService arpaymentDetailService) {
 		this.arpaymentDetailService = arpaymentDetailService;
 	}
-
+	
 	public Arinvoice getItem() {
 		return item;
 	}
@@ -243,7 +235,7 @@ public class PenandaanKirimModel implements Serializable{
 	public String getOperationStatus() {
 		return operationStatus;
 	}
-	
+
 	public BeanItemContainer<Arinvoice> getTableBeanItemContainer() {
 		return tableBeanItemContainer;
 	}

@@ -53,6 +53,9 @@ public class SysvarHelper {
 	 * 		_AR_MIN_IS_LNS	= Jumlah Nominal AR Minus Yang Dianggap Lunas
 	 * 		_ALLOW_AR_PLUS  = AR Boleh Plus
 	 * 
+	 * 		_AR_OVERDUE = Overdue Default Nota Kredit
+	 * 		_TOLE_OVERDUE = Toleransi Overdue Nota Kredit sebelum jadi OD
+	 * 
 	 * 		_URUT_BKB  = Nomor urut Buku Kas Besar
 	 * 		_URUT_BKK  = Nomor urut Buku Kas Kecil
 	 * 		_URUT_BBANK  = Nomor Urut Buku Bank
@@ -391,6 +394,46 @@ public class SysvarHelper {
 			sysvar.setGroupSysvar("_TRANSAKSI");
 			sysvar.setTipeData("BOL1");
 			sysvar.setNilaiBol1(true);
+			
+			sysvarService.createObject(sysvar);
+			
+		}
+		
+		sysvar = new Sysvar();		
+		sysvar = sysvarService.findById("_AR_OVERDUE", division);
+		if (sysvar.getId()==null){
+			SysvarPK id = new SysvarPK();
+			id.setIdSysvar("_AR_OVERDUE");
+			id.setDivision(division);
+			sysvar.setId(id);
+			
+			Division div= new Division();
+			div.setId(division);
+			sysvar.setDivisionBean(div);
+			
+			sysvar.setDeskripsi("Overdue/Jatuh Tempo Default Nota Kredit");
+			sysvar.setGroupSysvar("_TRANSAKSI");
+			sysvar.setTipeData("INT1");
+			sysvar.setNilaiInt1(7);
+			sysvarService.createObject(sysvar);
+			
+		}
+		sysvar = new Sysvar();		
+		sysvar = sysvarService.findById("_TOLE_OVERDUE", division);
+		if (sysvar.getId()==null){
+			SysvarPK id = new SysvarPK();
+			id.setIdSysvar("_TOLE_OVERDUE");
+			id.setDivision(division);
+			sysvar.setId(id);
+			
+			Division div= new Division();
+			div.setId(division);
+			sysvar.setDivisionBean(div);
+			
+			sysvar.setDeskripsi("Toleransi Overdue Nota Kredit sebelum jadi OD");
+			sysvar.setGroupSysvar("_TRANSAKSI");
+			sysvar.setTipeData("INT1");
+			sysvar.setNilaiInt1(7); //7 hari dari Jatuh tempo >> berarti 14 hari
 			
 			sysvarService.createObject(sysvar);
 			

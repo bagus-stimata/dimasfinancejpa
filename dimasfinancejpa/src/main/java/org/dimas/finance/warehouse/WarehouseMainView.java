@@ -1,8 +1,11 @@
 package org.dimas.finance.warehouse;
 
-import org.dimas.finance.ar.CustomerCreditModel;
-import org.dimas.finance.ar.CustomerCreditPresenter;
-import org.dimas.finance.ar.CustomerCreditView;
+import org.dimas.finance.ar.kredittunai.CustomerCreditModel;
+import org.dimas.finance.ar.kredittunai.CustomerCreditPresenter;
+import org.dimas.finance.ar.kredittunai.CustomerCreditView;
+import org.dimas.finance.warehouse.tunaiorkredit.PenandaanTunaiOrKreditModel;
+import org.dimas.finance.warehouse.tunaiorkredit.PenandaanTunaiOrKreditPresenter;
+import org.dimas.finance.warehouse.tunaiorkredit.PenandaanTunaiOrKreditView;
 
 import com.vaadin.annotations.Theme;
 import com.vaadin.navigator.View;
@@ -43,18 +46,28 @@ public class WarehouseMainView extends CssLayout implements View{
 		tab2.addComponent(penandaanTTDView);
 		tab2.setSizeFull();
 		
-		//SUMMARY PENGIRIMAN
+		//PENANDAAN TUNAI OR KREDIT
 		VerticalLayout tab3 = new VerticalLayout();
+		PenandaanTunaiOrKreditModel penandaanTuaniOrKreditModel = new PenandaanTunaiOrKreditModel();
+		PenandaanTunaiOrKreditView penandaanTunaiOrKreditView = new PenandaanTunaiOrKreditView(penandaanTuaniOrKreditModel);
+		new PenandaanTunaiOrKreditPresenter(penandaanTuaniOrKreditModel, penandaanTunaiOrKreditView);
+		penandaanTunaiOrKreditView.setSizeFull();
+		tab3.addComponent(penandaanTunaiOrKreditView);
+		tab3.setSizeFull();
+
+		//SUMMARY PENGIRIMAN
+		VerticalLayout tab4 = new VerticalLayout();
 		SummaryPengirimanModel summaryPengirimanModel = new SummaryPengirimanModel();
 		SummaryPengirimanView summaryPengirimanView = new SummaryPengirimanView(summaryPengirimanModel);
 		new SummaryPengirimanPresenter(summaryPengirimanModel, summaryPengirimanView);
 		summaryPengirimanView.setSizeFull();
-		tab3.addComponent(summaryPengirimanView);
-		tab3.setSizeFull();
+		tab4.addComponent(summaryPengirimanView);
+		tab4.setSizeFull();
 		
 		tabsheet.addTab(tab1, "Penandaan TERKIRIM",  null);
 		tabsheet.addTab(tab2, "TERTUNDA",  null);
-		tabsheet.addTab(tab3, "Summary Pengiriman",  null);
+		tabsheet.addTab(tab3, "Penandaan TUNAI-KREDIT",  null);
+		tabsheet.addTab(tab4, "Summary Pengiriman",  null);
 		
 
 		

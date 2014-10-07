@@ -1,4 +1,4 @@
-package org.dimas.finance.warehouse;
+package org.dimas.finance.ar.tunai;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -41,9 +41,8 @@ import com.vaadin.data.util.filter.Like;
 import com.vaadin.data.util.filter.Not;
 import com.vaadin.data.util.filter.Or;
 import com.vaadin.data.util.filter.SimpleStringFilter;
-import com.vaadin.data.util.filter.Compare.Equal;
 
-public class PenandaanKirimModel implements Serializable{
+public class PelunasanTunaiModel implements Serializable{
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -51,7 +50,6 @@ public class PenandaanKirimModel implements Serializable{
 	
 	public Arinvoice item;
 	private List<Arinvoice> list;
-
 	
 	private ArInvoiceJpaService arInvoiceService; 
 	private ArPaymentHeaderJpaService arpaymentHeaderService;
@@ -74,7 +72,7 @@ public class PenandaanKirimModel implements Serializable{
 	private boolean selectAllInvoice;
 	private TransaksiHelper managerTransaksi = new TransaksiHelper();
 	
-	public PenandaanKirimModel(){
+	public PelunasanTunaiModel(){
 		initVariable();		
 		initVariableData();
 	}
@@ -93,13 +91,15 @@ public class PenandaanKirimModel implements Serializable{
 	}
 	
 	public void initVariableData(){
-		System.out.println("Init >> PenandaanKirimModel >> initData");		
+		System.out.println("Init >> CustomerCreditModel >> initData");		
+		
 		//TABLE
 		tableList = new ArrayList<Arinvoice>();
-
+		
 //		tableJpaContainer =  JPAContainerFactory.make(Arinvoice.class, persistenceUnit);
 		tableBeanItemContainer.addAll(arInvoiceService.findAll());
 		setFilterDefaultBeanItemContainer();
+		
 		
 		//COMBOBOX DIVISION
 		beanItemContainerDivision.addAll(divisionService.findAll());
@@ -107,6 +107,7 @@ public class PenandaanKirimModel implements Serializable{
 		beanItemContainerSalesman.addAll(salesmanService.findAll());
 		
 	};
+
 	public void setCurrentContainerUncheck(){
 
 		Collection itemIds = tableBeanItemContainer.getItemIds();
@@ -115,7 +116,6 @@ public class PenandaanKirimModel implements Serializable{
 		}
 		
 	}
-	
 	
 	public ArInvoiceSelected convertArInvoiceToSelected(Arinvoice arInvoice){
 		ArInvoiceSelected item = new ArInvoiceSelected();
@@ -160,30 +160,22 @@ public class PenandaanKirimModel implements Serializable{
 
 	}
 	public void setFilterDefaultBeanItemContainer(){
-		//FILTER KRITERIA:
-		//1. Semua Invoice yang belum dilunasi
-		//2. Bukan Canvas
-		Filter filter = new Not(new Compare.Equal("lunas", true));
-		tableBeanItemContainer.addContainerFilter(filter);
+		//SELALU TUNAI
+		//CANVAS SELALU TUNAI
+		//TUNAI KREDIT TIDAK VALID
+		//HARUS SUDAH KIRIM
+
+		Filter filter01 =  new SimpleStringFilter("tipejual","TO", true, false);
+		tableBeanItemContainer.addContainerFilter(filter01);
+				
+//		Filter filter =  new SimpleStringFilter("tunaikredit","T", true, false);
+//		getTableJpaContainer().addContainerFilter(filter);		
+		Filter filter02 = new Or(new Compare.Equal("term", 1)); 
+		tableBeanItemContainer.addContainerFilter(filter02);
 		
-		Filter filterNotCanvas = new Not(new SimpleStringFilter("tipejual", "C", true, false));
-		tableBeanItemContainer.addContainerFilter(filterNotCanvas);
+		Filter filter03 = new Or(new Compare.Equal("terkirim", true)); 
+		tableBeanItemContainer.addContainerFilter(filter03);
 		
-	}
-	
-	public ArPaymentHeaderJpaService getArpaymentHeaderService() {
-		return arpaymentHeaderService;
-	}
-	public void setArpaymentHeaderService(
-			ArPaymentHeaderJpaService arpaymentHeaderService) {
-		this.arpaymentHeaderService = arpaymentHeaderService;
-	}
-	public ArPaymentDetailJpaService getArpaymentDetailService() {
-		return arpaymentDetailService;
-	}
-	public void setArpaymentDetailService(
-			ArPaymentDetailJpaService arpaymentDetailService) {
-		this.arpaymentDetailService = arpaymentDetailService;
 	}
 
 	public Arinvoice getItem() {
@@ -275,6 +267,20 @@ public class PenandaanKirimModel implements Serializable{
 	}
 	public void setManagerTransaksi(TransaksiHelper managerTransaksi) {
 		this.managerTransaksi = managerTransaksi;
+	}
+	public ArPaymentHeaderJpaService getArpaymentHeaderService() {
+		return arpaymentHeaderService;
+	}
+	public void setArpaymentHeaderService(
+			ArPaymentHeaderJpaService arpaymentHeaderService) {
+		this.arpaymentHeaderService = arpaymentHeaderService;
+	}
+	public ArPaymentDetailJpaService getArpaymentDetailService() {
+		return arpaymentDetailService;
+	}
+	public void setArpaymentDetailService(
+			ArPaymentDetailJpaService arpaymentDetailService) {
+		this.arpaymentDetailService = arpaymentDetailService;
 	}
 
 

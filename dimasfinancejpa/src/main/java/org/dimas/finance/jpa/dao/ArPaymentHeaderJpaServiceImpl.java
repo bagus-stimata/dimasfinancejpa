@@ -56,8 +56,8 @@ public class ArPaymentHeaderJpaServiceImpl extends GenericJpaServiceImpl<Arpayme
 	            		+ " AND a.id.division LIKE :division";
 	            
 	            List<Arpaymentheader> list = em.createQuery(query)
-	            		.setParameter("refno", strRefno)
-	            		.setParameter("division", strDivision)
+	            		.setParameter("refno",  "%" + strRefno.trim() + "%")
+	            		.setParameter("division", "%" + strDivision.trim() + "%")
 	            		.setHint(QueryHints.REFRESH, HintValues.TRUE)
 	            		.getResultList();
 	            em.getTransaction().commit();

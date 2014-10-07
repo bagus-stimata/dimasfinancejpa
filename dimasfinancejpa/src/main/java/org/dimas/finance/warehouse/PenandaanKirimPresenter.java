@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.dimas.finance.model.Arinvoice;
+import org.dimas.finance.model.ArinvoicePK;
 import org.dimas.finance.model.Arpaymentdetail;
 import org.dimas.finance.model.ArpaymentdetailPK;
 import org.dimas.finance.model.Arpaymentheader;
@@ -107,10 +108,10 @@ public class PenandaanKirimPresenter implements ClickListener, ValueChangeListen
 							view.getTable().setColumnHeader("selected", "<input type='checkbox'  checked />");		
 							model.setSelectAllInvoice(false);
 							
-							Collection itemIds = model.getTableJpaContainer().getItemIds();
+							Collection itemIds = model.getTableBeanItemContainer().getItemIds();
 							for (Object itemId: itemIds){
-								model.getTableJpaContainer().getItem(itemId).getEntity().getSelected().setReadOnly(false);
-								model.getTableJpaContainer().getItem(itemId).getEntity().getSelected().setValue(true);
+								model.getTableBeanItemContainer().getItem(itemId).getBean().getSelected().setReadOnly(false);
+								model.getTableBeanItemContainer().getItem(itemId).getBean().getSelected().setValue(true);
 							}
 							
 						} else {
@@ -118,10 +119,10 @@ public class PenandaanKirimPresenter implements ClickListener, ValueChangeListen
 							view.getTable().setColumnHeader("selected", "<input type='checkbox' />");		
 							model.setSelectAllInvoice(true);
 							
-							Collection itemIds = model.getTableJpaContainer().getItemIds();
+							Collection itemIds = model.getTableBeanItemContainer().getItemIds();
 							for (Object itemId: itemIds){
-								model.getTableJpaContainer().getItem(itemId).getEntity().getSelected().setReadOnly(false);
-								model.getTableJpaContainer().getItem(itemId).getEntity().getSelected().setValue(false);
+								model.getTableBeanItemContainer().getItem(itemId).getBean().getSelected().setReadOnly(false);
+								model.getTableBeanItemContainer().getItem(itemId).getBean().getSelected().setValue(false);
 							}
 							
 						}	
@@ -156,7 +157,7 @@ public class PenandaanKirimPresenter implements ClickListener, ValueChangeListen
 	
 	public void initDisplay(){
 		//1. Table
-		model.setFreshDataTable();
+		model.setFreshDataBeanItemContainer();
 		view.setDisplaySearchComponent();
 		view.setDisplay();
 		
@@ -202,23 +203,21 @@ public class PenandaanKirimPresenter implements ClickListener, ValueChangeListen
 			 d.focus();
 			
 		} else if (event.getButton() == view.getBtnBatalKirim()){
-			if (itemTableSelected != null){			
-				 final ConfirmDialog d = ConfirmDialog.show(view.getUI(),"Konfirmasi Batal Pengiriman", "BATALKAN PENANDAAN TERKIRIM?: ", 
-						 "Batalkan", "Cancel", konfirmDialogBatalKirimListener);
-				 
-				   final ShortcutListener enter = new ShortcutListener("Oke",
-			                KeyCode.ENTER, null) {
-			            @Override
-			            public void handleAction(Object sender, Object target) {
-			            	d.close();
-			            }
-			        };
-				
-				 d.setStyleName("dialog");
-				 d.getOkButton().setStyleName("small");
-				 d.getCancelButton().setStyleName("small");
-				 d.focus();
-			}			
+			 final ConfirmDialog d = ConfirmDialog.show(view.getUI(),"Konfirmasi Batal Pengiriman", "BATALKAN PENANDAAN TERKIRIM?: ", 
+					 "Batalkan", "Cancel", konfirmDialogBatalKirimListener);
+			 
+			   final ShortcutListener enter = new ShortcutListener("Oke",
+		                KeyCode.ENTER, null) {
+		            @Override
+		            public void handleAction(Object sender, Object target) {
+		            	d.close();
+		            }
+		        };
+			
+			 d.setStyleName("dialog");
+			 d.getOkButton().setStyleName("small");
+			 d.getCancelButton().setStyleName("small");
+			 d.focus();
 			
 		
 		} else if (event.getButton() == view.getBtnSelectRekapNo()){
@@ -235,21 +234,21 @@ public class PenandaanKirimPresenter implements ClickListener, ValueChangeListen
 	
 	public int searchForm(){
 		//1. Remove filter dan Refresh container dalulu dahulu
-//		//SELALU TUNAI
-		model.getTableJpaContainer().refresh();
-		model.getTableJpaContainer().removeAllContainerFilters();
-		model.setFilterDefaultJpaContainer();
+		model.getTableBeanItemContainer().removeAllItems();
+		model.getTableBeanItemContainer().removeAllContainerFilters();		
 		
-		//2. Baru Kasih Filter Lagi
+		//2. AMBAIL DARI DATABASE dengan Primary Key dan 
 		String invoiceNo = view.getFieldSearchByInvoice().getValue().toString().trim();
-	
-		Filter filter1 = new And(new SimpleStringFilter("id.invoiceno",invoiceNo, true, false));
-		model.getTableJpaContainer().addContainerFilter(filter1);
-
+		ArinvoicePK id = new ArinvoicePK();
+		id.setDivision("%");
+		id.setTipefaktur("%");
+		id.setInvoiceno("%" + invoiceNo + "%");
+		//FIND ALL PAKAI Ini
+		model.getTableBeanItemContainer().addAll(model.getArInvoiceService().findAllByIdPk(id));
+		//3. Filter Default
+		model.setFilterDefaultBeanItemContainer();
+		
 		//PARSING RECAPNO
-//		Filter[] filterRecaps = new Filter[2];			
-//		filterRecaps[0] = new And(new Like("recapno", "24288"));
-//		filterRecaps[1] = new And(new Like("recapno", "24287"));
 		String recapNo = view.getFieldSearchByRekap().getValue().toString().trim();
 		if (! recapNo.trim().equals("")){
 			String [] data = recapNo.split("\\,");			
@@ -259,7 +258,7 @@ public class PenandaanKirimPresenter implements ClickListener, ValueChangeListen
 			}
 			
 			Filter filter2 = new Or(filterRecaps);
-			model.getTableJpaContainer().addContainerFilter(filter2);
+			model.getTableBeanItemContainer().addContainerFilter(filter2);
 			
 		}
 
@@ -273,8 +272,9 @@ public class PenandaanKirimPresenter implements ClickListener, ValueChangeListen
 		} catch(Exception ex){}
 		try{
 			if (! strDivision.trim().equals("")){
-				Filter filter3 = new And(new SimpleStringFilter("id.division", strDivision, true, false));
-				model.getTableJpaContainer().addContainerFilter(filter3);
+//				Filter filter3 = new And(new SimpleStringFilter("id.division", strDivision, true, false));
+				Filter filter3 = new And(new Compare.Equal("divisionBean", div));
+				model.getTableBeanItemContainer().addContainerFilter(filter3);
 			} 
 		}catch(Exception ex){}
 
@@ -290,7 +290,7 @@ public class PenandaanKirimPresenter implements ClickListener, ValueChangeListen
 		try{
 			if (! strSalesman.trim().equals("")){
 				Filter filter4 = new And(new SimpleStringFilter("salesman", strSalesman, true, false));
-				model.getTableJpaContainer().addContainerFilter(filter4);
+				model.getTableBeanItemContainer().addContainerFilter(filter4);
 			} 
 		}catch(Exception ex){}
 		
@@ -307,7 +307,7 @@ public class PenandaanKirimPresenter implements ClickListener, ValueChangeListen
 			
 			
 			if (! view.getFieldSearchComboTerkirim().getValue().equals("S")){
-				model.getTableJpaContainer().addContainerFilter(filter7);
+				model.getTableBeanItemContainer().addContainerFilter(filter7);
 			}
 		} catch(Exception ex){
 			ex.printStackTrace();
@@ -332,10 +332,10 @@ public class PenandaanKirimPresenter implements ClickListener, ValueChangeListen
 			//Jika semua maka tidak ada filter
 			
 			if (tglInvoiceFromLong !=0){
-				model.getTableJpaContainer().addContainerFilter(filter8);
+				model.getTableBeanItemContainer().addContainerFilter(filter8);
 			}	
 			if (tglInvoiceToLong !=0){
-				model.getTableJpaContainer().addContainerFilter(filter9);
+				model.getTableBeanItemContainer().addContainerFilter(filter9);
 			}	
 		} catch(Exception ex){}
 			
@@ -381,13 +381,13 @@ public class PenandaanKirimPresenter implements ClickListener, ValueChangeListen
 	
 		try{
 			int nomorUrut=0;
-			Collection itemIds =  model.getTableJpaContainer().getItemIds();
+			Collection itemIds =  model.getTableBeanItemContainer().getItemIds();
 			List<Object> listObject = new ArrayList<Object>();
 
 			for (Object itemId: itemIds){
 				
 				Arinvoice item = new Arinvoice();
-				item = model.getTableJpaContainer().getItem(itemId).getEntity();
+				item = model.getTableBeanItemContainer().getItem(itemId).getBean();
 
 				if (item.getSelected().getValue()==true && item.isLunas() == false ){
 					
@@ -395,18 +395,16 @@ public class PenandaanKirimPresenter implements ClickListener, ValueChangeListen
 					item.setTerkirim(true);
 					model.getArInvoiceService().updateObject(item);
 					nomorUrut +=1;
-					//REFRESH SATU PERSATU
+					
 					listObject.add(itemId);
 					
 				}
 			
 			}
-			//REFRESH MANUAL
-			for (Object itemId: listObject){
-				model.getTableJpaContainer().refreshItem(itemId);
-			}
 			
-			view.getTable().refreshRowCache();
+			//REFRESH FROM
+			view.getBtnSearch().click();
+			
 			if (nomorUrut>0){
 				Notification.show("Sejumlah " + nomorUrut + " Nota berhasil diberi tanda TERKIRIM!");
 			} else {
@@ -424,13 +422,13 @@ public class PenandaanKirimPresenter implements ClickListener, ValueChangeListen
 		
 		try{
 			int nomorUrut=0;
-			Collection itemIds =  model.getTableJpaContainer().getItemIds();
+			Collection itemIds =  model.getTableBeanItemContainer().getItemIds();
 			List<Object> listObject = new ArrayList<Object>();
 
 			for (Object itemId: itemIds){
 				
 				Arinvoice item = new Arinvoice();
-				item = model.getTableJpaContainer().getItem(itemId).getEntity();
+				item = model.getTableBeanItemContainer().getItem(itemId).getBean();
 
 				if (item.getSelected().getValue()==true && item.isLunas() == false ){
 					
@@ -438,18 +436,15 @@ public class PenandaanKirimPresenter implements ClickListener, ValueChangeListen
 					item.setTerkirim(false);
 					model.getArInvoiceService().updateObject(item);
 					nomorUrut +=1;
-					//REFRESH SATU PERSATU
+					
 					listObject.add(itemId);
 					
 				}
 			
 			}
-			//REFRESH MANUAL
-			for (Object itemId: listObject){
-				model.getTableJpaContainer().refreshItem(itemId);
-			}
+			//REFRESH FROM
+			view.getBtnSearch().click();
 			
-			view.getTable().refreshRowCache();
 			if (nomorUrut>0){
 				Notification.show("Sejumlah " + nomorUrut + " Nota berhasil DIBATALKAN KIRIM!");
 			}else {
@@ -464,7 +459,7 @@ public class PenandaanKirimPresenter implements ClickListener, ValueChangeListen
 	}
 	
 	public int reloadForm(){		
-		model.setFreshDataTable();
+		model.setFreshDataBeanItemContainer();
 		view.setDisplay();
 		
 		return 0;
@@ -500,19 +495,19 @@ public class PenandaanKirimPresenter implements ClickListener, ValueChangeListen
 	public void valueChange(ValueChangeEvent event) {
 		try{
 			Object itemId = event.getProperty().getValue();
-			model.item = model.getTableJpaContainer().getItem(itemId).getEntity();			
+			model.item = model.getTableBeanItemContainer().getItem(itemId).getBean();			
 			itemTableSelected = view.getTable().getItem(itemId);
 			//biar checked
-			model.getTableJpaContainer().getItem(itemId).getEntity().getSelected().setReadOnly(false);
+			model.getTableBeanItemContainer().getItem(itemId).getBean().getSelected().setReadOnly(false);
 			if (model.getItem().getSelected().getValue()==true){
-				model.getTableJpaContainer().getItem(itemId).getEntity().getSelected().setValue(false);
+				model.getTableBeanItemContainer().getItem(itemId).getBean().getSelected().setValue(false);
 			} else {
-				model.getTableJpaContainer().getItem(itemId).getEntity().getSelected().setValue(true);				
+				model.getTableBeanItemContainer().getItem(itemId).getBean().getSelected().setValue(true);				
 			}
 			//JIKA LUNAS TIDAK BOLEH DI CHECK
 			if (model.getItem().isLunas()==true){
 				Notification.show("FAKTUR " + item.getId() + " SUDAH LUNAS!!");
-				model.getTableJpaContainer().getItem(itemId).getEntity().getSelected().setValue(false);				
+				model.getTableBeanItemContainer().getItem(itemId).getBean().getSelected().setValue(false);				
 			}
 			
 			view.setDisplayFooter();
@@ -530,14 +525,14 @@ public class PenandaanKirimPresenter implements ClickListener, ValueChangeListen
 
 //		try{
 //			Object itemId = event.getItemId();
-//			model.item = model.getTableJpaContainer().getItem(itemId).getEntity();			
+//			model.item = model.getTableBeanItemContainer().getItem(itemId).getBean();			
 //			itemTableSelected = view.getTable().getItem(itemId);
 //			
-//			model.getTableJpaContainer().getItem(itemId).getEntity().getSelected().setReadOnly(false);
+//			model.getTableBeanItemContainer().getItem(itemId).getBean().getSelected().setReadOnly(false);
 //			if (model.getItem().getSelected().getValue()==true){
-//				model.getTableJpaContainer().getItem(itemId).getEntity().getSelected().setValue(false);
+//				model.getTableBeanItemContainer().getItem(itemId).getBean().getSelected().setValue(false);
 //			} else {
-//				model.getTableJpaContainer().getItem(itemId).getEntity().getSelected().setValue(true);				
+//				model.getTableBeanItemContainer().getItem(itemId).getBean().getSelected().setValue(true);				
 //			}
 //			view.setDisplayFooter();
 //			

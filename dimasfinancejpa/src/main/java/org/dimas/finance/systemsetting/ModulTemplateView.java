@@ -4,9 +4,9 @@ import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
 
-import org.dimas.finance.ar.ArPaymentCustPembayaranModel;
-import org.dimas.finance.ar.ArPaymentCustPembayaranPresenter;
-import org.dimas.finance.ar.ArPaymentCustPembayaranView;
+import org.dimas.finance.ar.kredittunai.ArPaymentCustPembayaranModel;
+import org.dimas.finance.ar.kredittunai.ArPaymentCustPembayaranPresenter;
+import org.dimas.finance.ar.kredittunai.ArPaymentCustPembayaranView;
 import org.dimas.finance.model.Arinvoice;
 import org.dimas.finance.model.Arpaymentdetail;
 import org.dimas.finance.model.modelenum.EnumFormOperationStatus;

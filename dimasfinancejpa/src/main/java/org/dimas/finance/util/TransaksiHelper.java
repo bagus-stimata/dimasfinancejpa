@@ -74,6 +74,29 @@ public class TransaksiHelper {
 		String currentKode = nomorUrutSekarang;
 		return currentKode;
 	}	
+	
+	public int getOverdueDefault(Division division){
+		int intValue = 0;
+		//1. AMBIL TANGGAL TRANSAKSI BERJALAN SEKARANG
+		Sysvar sysvar = new Sysvar();
+		sysvar = sysvarService.findById("_AR_OVERDUE", division.getId());
+		 if (sysvar.getNilaiInt1()!=null){
+			 intValue = sysvar.getNilaiInt1();
+		 }
+		 
+		return intValue;
+	}
+	public int getOverdueToleransiDefault(Division division){
+		int intValue = 0;
+		//1. AMBIL TANGGAL TRANSAKSI BERJALAN SEKARANG
+		Sysvar sysvar = new Sysvar();
+		sysvar = sysvarService.findById("_TOLE_OVERDUE", division.getId());
+		 if (sysvar.getNilaiInt1()!=null){
+			 intValue = sysvar.getNilaiInt1();
+		 }
+		return intValue;
+	}
+	
 	public String getNewNomorUrutArPayment(Division division){
 		boolean baru=true;
 		
@@ -242,7 +265,7 @@ public class TransaksiHelper {
 		
 		//ULANG SAMPAI TIDAK ADA YANG KEMBAR >> JIKA NAIK SATU TIDAK KEMBAR MAKA ITU NOMOR SEKARANG
 		//ULANG SAMPAI TIDAK ADA YANG KEMBAR >> JIKA NAIK SATU TIDAK KEMBAR MAKA ITU NOMOR SEKARANG
-		if (arpaymentHeaderService.count()>0){
+		if (bukuGiroService.count()>0){
 			boolean kodeKembar = true;
 			while (kodeKembar==true){
 				//1. Jadikan integer dan tambah satu
@@ -352,7 +375,7 @@ public class TransaksiHelper {
 		}
 		
 		//ULANG SAMPAI TIDAK ADA YANG KEMBAR >> JIKA NAIK SATU TIDAK KEMBAR MAKA ITU NOMOR SEKARANG
-		if (arpaymentHeaderService.count()>0){
+		if (bukuTransferService.count()>0){
 			boolean kodeKembar = true;
 			while (kodeKembar==true){
 				//1. Jadikan integer dan tambah satu

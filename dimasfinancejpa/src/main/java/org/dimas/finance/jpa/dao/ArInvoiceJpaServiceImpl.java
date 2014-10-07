@@ -276,6 +276,35 @@ public class ArInvoiceJpaServiceImpl extends GenericJpaServiceImpl<Arinvoice, Se
 	            em.close();
 	        }    
 	}
+
+	@Override
+	public List<Arinvoice> findAllByIdPk(ArinvoicePK id) {
+		// TODO Auto-generated method stub
+	       EntityManager em = getFactory().createEntityManager();
+	        try {
+	        	
+	            em.getTransaction().begin();
+	            String query = "SELECT a From Arinvoice a "
+	            		+ " WHERE "
+	            		+ " a.id.invoiceno LIKE :invoiceno AND a.id.division LIKE :division"
+	            		+ " AND a.id.tipefaktur LIKE :tipefaktur ";
+	            
+	            List<Arinvoice> list = em.createQuery(query)
+	            		.setParameter("invoiceno", id.getInvoiceno())
+	            		.setParameter("division", id.getDivision())
+	            		.setParameter("tipefaktur", id.getTipefaktur())
+	            		.setHint(QueryHints.REFRESH, HintValues.TRUE)
+	            		.getResultList();
+	            
+	            em.getTransaction().commit();
+	            return list;
+	        } catch (PersistenceException exception) {
+	            em.getTransaction().rollback();
+	            throw exception;
+	        } finally {
+	            em.close();
+	        }    
+	}
 	
 	
 

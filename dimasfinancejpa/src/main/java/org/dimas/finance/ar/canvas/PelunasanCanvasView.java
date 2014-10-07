@@ -1,10 +1,13 @@
-package org.dimas.finance.warehouse;
+package org.dimas.finance.ar.canvas;
 
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
 
+import org.dimas.finance.ar.ArRecapSelectModel;
+import org.dimas.finance.ar.ArRecapSelectPresenter;
+import org.dimas.finance.ar.ArRecapSelectView;
 import org.dimas.finance.model.Arinvoice;
 import org.dimas.finance.model.modelenum.EnumFormOperationStatus;
 import org.dimas.finance.util.HelpManager;
@@ -22,16 +25,16 @@ import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
 import com.vaadin.ui.Table;
-import com.vaadin.ui.Window;
 import com.vaadin.ui.Table.Align;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.VerticalSplitPanel;
+import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.Reindeer;
 
-public class PenandaanKirimView extends CustomComponent {
+public class PelunasanCanvasView extends CustomComponent {
 	
-	private PenandaanKirimModel model;
+	private PelunasanCanvasModel model;
 	private VerticalLayout content = new VerticalLayout();
 	
 	private Table table;
@@ -45,10 +48,10 @@ public class PenandaanKirimView extends CustomComponent {
 
 	//Additional Component	
 	private TextField fieldSearchByRekap;
-	private Button btnSelectRekapNo = new Button("F");
+	private Button btnSelectRekapNo = new Button("F");	
 	private ComboBox fieldSearchComboDivisi;
 	private TextField fieldSearchByInvoice;	
-	private ComboBox fieldSearchComboTerkirim;
+	private ComboBox fieldSearchComboLunas;
 	
 	private ComboBox fieldSearchComboSalesman;	
 	
@@ -57,8 +60,8 @@ public class PenandaanKirimView extends CustomComponent {
 
 	private Button btnSearch;
 	private Button btnReload;
-	private Button btnSetKirim;
-	private Button btnBatalKirim;
+	private Button btnLunaskan;
+	private Button btnBatalLunaskan;
 	
 	private Button btnPrint;
 	private Button btnHelp;	
@@ -87,8 +90,8 @@ public class PenandaanKirimView extends CustomComponent {
     private TextField fieldAmountSum= new TextField("Nilai Faktur(TO+CVS): ");
     private TextField fieldAmountPaySum = new TextField("BAYAR: ");
 	
-	public PenandaanKirimView(PenandaanKirimModel model){
-		this.model = model;
+	public PelunasanCanvasView(PelunasanCanvasModel model){
+		this.model = model;		
 		initComponent();
 		initFieldFactory();
 		buildView();
@@ -97,7 +100,6 @@ public class PenandaanKirimView extends CustomComponent {
 		operationStatus = EnumFormOperationStatus.OPEN.getStrCode();
 		
 	}
-	
 	public void initComponent(){
 //		table = new Table("Table:", model.getTableJpaContainer());		
 		
@@ -121,6 +123,7 @@ public class PenandaanKirimView extends CustomComponent {
 		        return super.formatPropertyValue(rowId, colId, property);
 		    }
 		};		
+		
 		
 		fieldSearchByRekap = new TextField("NO. REKAP");
 		fieldSearchByRekap.setStyleName(Reindeer.TEXTFIELD_SMALL);
@@ -147,9 +150,9 @@ public class PenandaanKirimView extends CustomComponent {
 		fieldSearchComboSalesman.setStyleName(Reindeer.TEXTFIELD_SMALL);
 		fieldSearchComboSalesman.setWidth("120px");
 		
-		fieldSearchComboTerkirim = new ComboBox("Terkirim/Belum");
-		fieldSearchComboTerkirim.setItemCaptionMode(ItemCaptionMode.EXPLICIT_DEFAULTS_ID);				
-		fieldSearchComboTerkirim.setNullSelectionAllowed(false);
+		fieldSearchComboLunas = new ComboBox("Lunas/Belum");
+		fieldSearchComboLunas.setItemCaptionMode(ItemCaptionMode.EXPLICIT_DEFAULTS_ID);				
+		fieldSearchComboLunas.setNullSelectionAllowed(false);
 		
 		//FOOTER SELECTED
 		fieldSelectedCount.setWidth("100px");
@@ -163,7 +166,49 @@ public class PenandaanKirimView extends CustomComponent {
 		fieldCanvasSum.setWidth("110px");
 		fieldAmountSum.setWidth("120px");
 		fieldAmountPaySum.setWidth("110px");
-	    
+		
+		btnSearch = new Button("Search");
+		btnSearch.setStyleName(Reindeer.BUTTON_SMALL);
+		btnReload = new Button("Reload");
+		btnReload.setStyleName(Reindeer.BUTTON_SMALL);
+		btnLunaskan = new Button("Lunaskan!!");
+		btnLunaskan.setStyleName(Reindeer.BUTTON_SMALL);
+		btnBatalLunaskan = new Button("Batalkan");
+		btnBatalLunaskan.setStyleName(Reindeer.BUTTON_SMALL);
+		
+		
+		
+		btnPrint = new Button("Print");
+		btnHelp = new Button("Help");
+		
+		btnSeparator1 = new Button("");
+		btnSeparator1.setEnabled(false);
+		btnSeparator2 = new Button("::");
+		btnSeparator2.setEnabled(false);
+		
+		fieldAmountPaySum.setImmediate(true);
+		
+	}
+	public void initFieldFactory(){
+		// Can't access the editable components from the table so
+		// must store the information
+	}
+	
+	public void buildView(){
+		content.setSizeFull();
+		
+		//Inisialisasi Panel 
+		setSizeFull();
+		panelUtama = new Panel(getCaption());
+		panelUtama.setSizeFull();
+
+		panelTop = new Panel();
+		panelTop.setSizeFull();
+		panelTabel = new Panel();
+		panelTabel.setSizeFull();
+		panelForm = new Panel();
+		panelForm.setSizeFull();
+
 		//Init komponen tengah
 		table.setSizeFull();
 		table.setSelectable(true);
@@ -179,54 +224,14 @@ public class PenandaanKirimView extends CustomComponent {
 //		commit = new Button("Save");		
 //		discard = new Button("Cancel");
 		
-		btnSearch = new Button("Search");
-		btnSearch.setStyleName(Reindeer.BUTTON_SMALL);
-		btnReload = new Button("Reload");
-		btnReload.setStyleName(Reindeer.BUTTON_SMALL);
-		btnSetKirim = new Button("Tandai KIRIM");
-		btnSetKirim.setStyleName(Reindeer.BUTTON_SMALL);
-		btnBatalKirim = new Button("BATAL!!");
-		btnBatalKirim.setStyleName(Reindeer.BUTTON_SMALL);
-		
-		
-		
-		btnPrint = new Button("Print");
-		btnHelp = new Button("Help");
-		
-		btnSeparator1 = new Button("");
-		btnSeparator1.setEnabled(false);
-		btnSeparator2 = new Button("::");
-		btnSeparator2.setEnabled(false);
-		
 		//Init komponen bawah
 		form = new Form();
 		form.setVisible(false);
 		form.setBuffered(true);
 		form.setImmediate(false);
 		
-	}
-	
-	public void initFieldFactory(){
-		// Can't access the editable components from the table so
-		// must store the information
-	}
-	
-	public void buildView(){
-		
-		//Inisialisasi Panel 
-		content.setSizeFull();
-		setSizeFull();
-		panelUtama = new Panel(getCaption());
-		panelUtama.setSizeFull();
-		
-		panelTop = new Panel();
-		panelTop.setSizeFull();
-		panelTabel = new Panel();
-		panelTabel.setSizeFull();
-		panelForm = new Panel();
-		panelForm.setSizeFull();
-		
-		//Init Komponen atas
+		//DEKLARASI LAYOUT
+		//KOMPONEN ATAS
 		VerticalLayout layoutTopUtama = new VerticalLayout();
 		layoutTopUtama.setSizeFull();
 		layoutTopUtama.addComponent(panelTop);
@@ -236,33 +241,35 @@ public class PenandaanKirimView extends CustomComponent {
 		
 		layoutTopInner.addComponent(fieldSearchByRekap);
 		layoutTopInner.addComponent(btnSelectRekapNo);
-		layoutTopInner.setComponentAlignment(btnSelectRekapNo, Alignment.BOTTOM_CENTER);
 		layoutTopInner.addComponent(fieldSearchComboDivisi);
 		layoutTopInner.addComponent(fieldSearchByInvoice);	
 		layoutTopInner.addComponent(fieldSearchComboSalesman);
-		layoutTopInner.addComponent(fieldSearchComboTerkirim);
+		layoutTopInner.addComponent(fieldSearchComboLunas);
 		
 		layoutTopInner.addComponent(fieldSearchByDateInvoiceFrom);
 		layoutTopInner.addComponent(fieldSearchByDateInvoiceTo);
 
-
+		layoutTopInner.setComponentAlignment(btnSelectRekapNo, Alignment.BOTTOM_CENTER);
+		
+		
 		layoutTopInner.addComponent(btnSearch);
 		layoutTopInner.setComponentAlignment(btnSearch, Alignment.BOTTOM_CENTER);
+//		layoutTop.addComponent(btnReload);
+//		layoutTop.setComponentAlignment(btnReload, Alignment.BOTTOM_CENTER);
 		layoutTopInner.addComponent(btnSeparator1);
 		layoutTopInner.setComponentAlignment(btnSeparator1, Alignment.BOTTOM_CENTER);
-		layoutTopInner.addComponent(btnSetKirim);
-		layoutTopInner.setComponentAlignment(btnSetKirim, Alignment.BOTTOM_CENTER);
-		layoutTopInner.addComponent(btnBatalKirim);
-		layoutTopInner.setComponentAlignment(btnBatalKirim, Alignment.BOTTOM_CENTER);
+		layoutTopInner.addComponent(btnLunaskan);
+		layoutTopInner.setComponentAlignment(btnLunaskan, Alignment.BOTTOM_CENTER);
+		layoutTopInner.addComponent(btnBatalLunaskan);
+		layoutTopInner.setComponentAlignment(btnBatalLunaskan, Alignment.BOTTOM_CENTER);
 		
-		
+
 		//KOMPONEN TENGAH
-		VerticalSplitPanel verticalSplitPanelUtama = new VerticalSplitPanel();
-		verticalSplitPanelUtama.setSizeFull();		
-		verticalSplitPanelUtama.setSplitPosition(85);
+		VerticalLayout middleLayout = new VerticalLayout();
+		VerticalSplitPanel verticalSplitPanel = new VerticalSplitPanel();
+		verticalSplitPanel.setSizeFull();		
+		verticalSplitPanel.setSplitPosition(85);
 		
-		
-//		HorizontalLayout horBut = new HorizontalLayout();
 		
 		panelTabel.setContent(table);
 		
@@ -283,41 +290,36 @@ public class PenandaanKirimView extends CustomComponent {
 		layoutFooter.setSpacing(true);
 		panelForm.setContent(layoutFooter);
 		
-		verticalSplitPanelUtama.setFirstComponent(panelTabel);		
-		verticalSplitPanelUtama.setSecondComponent(panelForm);
+		verticalSplitPanel.setFirstComponent(panelTabel);		
+		verticalSplitPanel.setSecondComponent(panelForm);
 
 		content.addComponent(new Label("***"));
-		
 		content.addComponent(layoutTopUtama);
-		content.addComponent(verticalSplitPanelUtama);
+		content.addComponent(verticalSplitPanel);
 		
 		panelUtama.setContent(content);
 		panelUtama.setSizeFull();
 		setCompositionRoot(panelUtama);	
 		
 		content.setExpandRatio(layoutTopUtama, 1);
-		content.setExpandRatio(verticalSplitPanelUtama, 10);
+		content.setExpandRatio(verticalSplitPanel, 9);
 		
-		//VISIBLE COMPONEN
-		fieldAmountPaySum.setVisible(false);
+		btnSelectRekapNo.setVisible(false);
 		
 	}
-	
 	public void setVisibleTableProperties(Object... tablePropertyIds) {
 		table.setVisibleColumns(tablePropertyIds);		
 	}
-	
 	public void setVisibleFormProperties(Object... formPropertyIds) {
 		this.formPropertyIds = formPropertyIds;
 		form.setVisibleItemProperties(formPropertyIds);
 	}
-	
 	public void setTableProperties(){
-		setVisibleTableProperties("selected", "recapno", "id", "tipejual", "tunaikredit", "salesmanBean", 
-				"amount",   "amountpay", "terkirim", "tertundacounter",  "lunas","nopo",  
-				"invoicedate", "term","duedate" ,
+		setVisibleTableProperties("selected", "recapno", "id", "tunaikredit", "tipejual", "salesmanBean", 
+				"amount",   "amountpay", "lunas","nopo",  
+				"invoicedate", "term","duedate" , "terkirim", "tertundacounter", 
 				"actualduedate",  "ppn", "disc1", "disc2",
-				"spname", "customerBean",  "custname", "divisionBean",
+				"spname", "custname", "divisionBean", "customerBean", 
 				"disc3", "lockupdate", "orderdate");
 		
 		
@@ -327,9 +329,7 @@ public class PenandaanKirimView extends CustomComponent {
 			table.setColumnCollapsed("lockupdate", true);
 			table.setColumnCollapsed("orderdate", true);
 			table.setColumnCollapsed("disc3", true);
-			table.setColumnCollapsed("lunas", true);
-			table.setColumnCollapsed("lunas", true);
-			table.setColumnCollapsed("amountpay", true);
+//			table.setColumnCollapsed("tipejual", true);
 			
 		} catch(Exception ex){}
 		
@@ -344,9 +344,8 @@ public class PenandaanKirimView extends CustomComponent {
 		table.setColumnAlignment("lunas", Align.CENTER);
 		table.setColumnAlignment("terkirim", Align.CENTER);
 		table.setColumnAlignment("tertundacounter", Align.CENTER);
-		table.setColumnAlignment("tipejual", Align.CENTER);
 		
-		//SET HEADER
+		//set header
 		table.setColumnHeader("selected", "<input type='checkbox'/>");
 		table.setColumnHeader("recapno", "REKAP");
 		table.setColumnHeader("id", "INVOICE-DIV-F/R");
@@ -354,14 +353,15 @@ public class PenandaanKirimView extends CustomComponent {
 		table.setColumnHeader("spname", "SALESMAN TRANS");
 		table.setColumnHeader("amount", "NOMINAL+PPN");
 		table.setColumnHeader("amountpay", "TERBAYAR");
-		table.setColumnHeader("salesmanBean", "SALES ACTUAL");
-		table.setColumnHeader("customerBean", "CUST ACTUAL");
-		table.setColumnHeader("tertundacounter", "TTD");
+		table.setColumnHeader("salesmanBean", "NAMA SALES ACTUAL");
+		table.setColumnHeader("customerBean", "NAMA CUST ACTUAL");
+		table.setColumnHeader("tertundacounter", "TT");
 		table.setColumnHeader("terkirim", "KIRIM");
 		table.setColumnHeader("tunaikredit", "T/K");
 		table.setColumnHeader("lunas", "LNS");
 		table.setColumnHeader("term", "TOP");
-		table.setColumnHeader("tipejual", "TO/C/TF");
+		table.setColumnHeader("tipejual", "TO/TF/C");
+		
 		
 //		table.setColumnExpandRatio("selected", 2);
 //		table.setColumnExpandRatio("recapno", 3);
@@ -390,35 +390,30 @@ public class PenandaanKirimView extends CustomComponent {
 //		table.setColumnExpandRatio("orderdate", 3);
 				
 	}
-	
 	public void setFormProperties(){
 //		setVisibleFormProperties("arinvoicePK.id");
 	}
-	
 	public void setDisplaySearchComponent(){
-		getFieldSearchComboDivisi().setContainerDataSource(model.getBeanItemContainerDivision());		
+		getFieldSearchComboDivisi().setContainerDataSource(model.getBeanItemContainerDivision());
 		getFieldSearchComboDivisi().setNullSelectionAllowed(false);
 		getFieldSearchComboDivisi().select(model.getBeanItemContainerDivision().getIdByIndex(0));
-		
+
 		getFieldSearchComboSalesman().setContainerDataSource(model.getBeanItemContainerSalesman());
 		
-		fieldSearchComboTerkirim.addItem("B");
-		fieldSearchComboTerkirim.setItemCaption("B", "Belum");
-		fieldSearchComboTerkirim.addItem("K");
-		fieldSearchComboTerkirim.setItemCaption("K", "Terkirim");
-		fieldSearchComboTerkirim.addItem("S");
-		fieldSearchComboTerkirim.setItemCaption("S", "Semua");
-		fieldSearchComboTerkirim.setStyleName(Reindeer.TEXTFIELD_SMALL);
-		fieldSearchComboTerkirim.setWidth("70px");
-
-		//DEFAULT VIEW
-		fieldSearchComboTerkirim.select("B");
+		fieldSearchComboLunas.addItem("B");
+		fieldSearchComboLunas.setItemCaption("B", "Belum");
+		fieldSearchComboLunas.addItem("L");
+		fieldSearchComboLunas.setItemCaption("L", "Lunas");
+		fieldSearchComboLunas.addItem("S");
+		fieldSearchComboLunas.setItemCaption("S", "Semua");
+		fieldSearchComboLunas.setStyleName(Reindeer.TEXTFIELD_SMALL);
+		fieldSearchComboLunas.setWidth("70px");
+		fieldSearchComboLunas.select("B");
 		
 	}
-	
 	public void setDisplay(){
-		
-		//1. Refresh Table display
+		//1. Refresh Table displa
+//		table.setContainerDataSource(model.getTableBeanItemContainer());
 		table.setContainerDataSource(model.getTableBeanItemContainer());
 		
 		//2. Jika table masih dalam kondisi di seleksi maka form masih diisi dengan hasil seleksi
@@ -550,8 +545,8 @@ public class PenandaanKirimView extends CustomComponent {
 
 	private Window windowRecapSearch = new Window();	
 	
-	private WhRecapSelectModel recapSelectModel; 
-	private WhRecapSelectView recapSelectView;
+	private ArRecapSelectModel recapSelectModel; 
+	private ArRecapSelectView recapSelectView;
 	
 	//WINDOW HEADER SELECT
 	public void buildWindowRecapSelect(){
@@ -566,10 +561,10 @@ public class PenandaanKirimView extends CustomComponent {
 		
 		//INITIAL DATA TO PASS
 		
-		recapSelectModel = new WhRecapSelectModel();
-		recapSelectView = new WhRecapSelectView(recapSelectModel);
+		recapSelectModel = new ArRecapSelectModel();
+		recapSelectView = new ArRecapSelectView(recapSelectModel);
 		
-		WhRecapSelectPresenter recapSelectPresenter = new WhRecapSelectPresenter(
+		ArRecapSelectPresenter recapSelectPresenter = new ArRecapSelectPresenter(
 				recapSelectModel, recapSelectView);		
 		recapSelectView.setSizeFull();		
 		
@@ -584,351 +579,267 @@ public class PenandaanKirimView extends CustomComponent {
 	}
 	
 	
-	public PenandaanKirimModel getModel() {
+	
+	public PelunasanCanvasModel getModel() {
 		return model;
 	}
-
-	public void setModel(PenandaanKirimModel model) {
+	public void setModel(PelunasanCanvasModel model) {
 		this.model = model;
 	}
-
 	public VerticalLayout getContent() {
 		return content;
 	}
-
 	public void setContent(VerticalLayout content) {
 		this.content = content;
 	}
-
 	public Table getTable() {
 		return table;
 	}
-
 	public void setTable(Table table) {
 		this.table = table;
 	}
-
 	public Form getForm() {
 		return form;
 	}
-
 	public void setForm(Form form) {
 		this.form = form;
 	}
-
 	public FieldFactory getFieldFactory() {
 		return fieldFactory;
 	}
-
 	public void setFieldFactory(FieldFactory fieldFactory) {
 		this.fieldFactory = fieldFactory;
 	}
-
 	public Class<Arinvoice> getEntityClass() {
 		return entityClass;
 	}
-
 	public void setEntityClass(Class<Arinvoice> entityClass) {
 		this.entityClass = entityClass;
 	}
-
 	public Object[] getFormPropertyIds() {
 		return formPropertyIds;
 	}
-
 	public void setFormPropertyIds(Object[] formPropertyIds) {
 		this.formPropertyIds = formPropertyIds;
 	}
-
 	public String getOperationStatus() {
 		return operationStatus;
 	}
-
 	public void setOperationStatus(String operationStatus) {
 		this.operationStatus = operationStatus;
 	}
-
 	public TextField getFieldSearchByRekap() {
 		return fieldSearchByRekap;
 	}
-
 	public void setFieldSearchByRekap(TextField fieldSearchByRekap) {
 		this.fieldSearchByRekap = fieldSearchByRekap;
 	}
-
 	public ComboBox getFieldSearchComboDivisi() {
 		return fieldSearchComboDivisi;
 	}
-
 	public void setFieldSearchComboDivisi(ComboBox fieldSearchComboDivisi) {
 		this.fieldSearchComboDivisi = fieldSearchComboDivisi;
 	}
-
 	public TextField getFieldSearchByInvoice() {
 		return fieldSearchByInvoice;
 	}
-
 	public void setFieldSearchByInvoice(TextField fieldSearchByInvoice) {
 		this.fieldSearchByInvoice = fieldSearchByInvoice;
 	}
-
-	public ComboBox getFieldSearchComboTerkirim() {
-		return fieldSearchComboTerkirim;
+	public ComboBox getFieldSearchComboLunas() {
+		return fieldSearchComboLunas;
 	}
-
-	public void setFieldSearchComboTerkirim(ComboBox fieldSearchComboTerkirim) {
-		this.fieldSearchComboTerkirim = fieldSearchComboTerkirim;
+	public void setFieldSearchComboLunas(ComboBox fieldSearchComboLunas) {
+		this.fieldSearchComboLunas = fieldSearchComboLunas;
 	}
-
-	public ComboBox getFieldSearchComboSalesman() {
-		return fieldSearchComboSalesman;
-	}
-
-	public void setFieldSearchComboSalesman(ComboBox fieldSearchComboSalesman) {
-		this.fieldSearchComboSalesman = fieldSearchComboSalesman;
-	}
-
 	public DateField getFieldSearchByDateInvoiceFrom() {
 		return fieldSearchByDateInvoiceFrom;
 	}
-
 	public void setFieldSearchByDateInvoiceFrom(
 			DateField fieldSearchByDateInvoiceFrom) {
 		this.fieldSearchByDateInvoiceFrom = fieldSearchByDateInvoiceFrom;
 	}
-
 	public DateField getFieldSearchByDateInvoiceTo() {
 		return fieldSearchByDateInvoiceTo;
 	}
-
 	public void setFieldSearchByDateInvoiceTo(DateField fieldSearchByDateInvoiceTo) {
 		this.fieldSearchByDateInvoiceTo = fieldSearchByDateInvoiceTo;
 	}
-
 	public Button getBtnSearch() {
 		return btnSearch;
 	}
-
 	public void setBtnSearch(Button btnSearch) {
 		this.btnSearch = btnSearch;
 	}
-
 	public Button getBtnReload() {
 		return btnReload;
 	}
-
 	public void setBtnReload(Button btnReload) {
 		this.btnReload = btnReload;
 	}
-
-	public Button getBtnSetKirim() {
-		return btnSetKirim;
+	public Button getBtnLunaskan() {
+		return btnLunaskan;
 	}
-
-	public void setBtnSetKirim(Button btnSetKirim) {
-		this.btnSetKirim = btnSetKirim;
+	public void setBtnLunaskan(Button btnLunaskan) {
+		this.btnLunaskan = btnLunaskan;
 	}
-
-	public Button getBtnBatalKirim() {
-		return btnBatalKirim;
-	}
-
-	public void setBtnBatalKirim(Button btnBatalKirim) {
-		this.btnBatalKirim = btnBatalKirim;
-	}
-
 	public Button getBtnPrint() {
 		return btnPrint;
 	}
-
 	public void setBtnPrint(Button btnPrint) {
 		this.btnPrint = btnPrint;
 	}
-
 	public Button getBtnHelp() {
 		return btnHelp;
 	}
-
 	public void setBtnHelp(Button btnHelp) {
 		this.btnHelp = btnHelp;
 	}
-
 	public Button getBtnSeparator1() {
 		return btnSeparator1;
 	}
-
 	public void setBtnSeparator1(Button btnSeparator1) {
 		this.btnSeparator1 = btnSeparator1;
 	}
-
 	public Button getBtnSeparator2() {
 		return btnSeparator2;
 	}
-
 	public void setBtnSeparator2(Button btnSeparator2) {
 		this.btnSeparator2 = btnSeparator2;
 	}
-
 	public Panel getPanelUtama() {
 		return panelUtama;
 	}
-
 	public void setPanelUtama(Panel panelUtama) {
 		this.panelUtama = panelUtama;
 	}
-
 	public Panel getPanelTop() {
 		return panelTop;
 	}
-
 	public void setPanelTop(Panel panelTop) {
 		this.panelTop = panelTop;
 	}
-
 	public Panel getPanelTabel() {
 		return panelTabel;
 	}
-
 	public void setPanelTabel(Panel panelTabel) {
 		this.panelTabel = panelTabel;
 	}
-
 	public Panel getPanelForm() {
 		return panelForm;
 	}
-
 	public void setPanelForm(Panel panelForm) {
 		this.panelForm = panelForm;
 	}
-
 	public HelpManager getHelpManager() {
 		return helpManager;
 	}
-
 	public void setHelpManager(HelpManager helpManager) {
 		this.helpManager = helpManager;
 	}
-
+	public ComboBox getFieldSearchComboSalesman() {
+		return fieldSearchComboSalesman;
+	}
+	public void setFieldSearchComboSalesman(ComboBox fieldSearchComboSalesman) {
+		this.fieldSearchComboSalesman = fieldSearchComboSalesman;
+	}
+	public Button getBtnBatalLunaskan() {
+		return btnBatalLunaskan;
+	}
+	public void setBtnBatalLunaskan(Button btnBatalLunaskan) {
+		this.btnBatalLunaskan = btnBatalLunaskan;
+	}
 	public TextField getFieldSelectedCount() {
 		return fieldSelectedCount;
 	}
-
 	public void setFieldSelectedCount(TextField fieldSelectedCount) {
 		this.fieldSelectedCount = fieldSelectedCount;
 	}
-
 	public TextField getFieldTunaiCount() {
 		return fieldTunaiCount;
 	}
-
 	public void setFieldTunaiCount(TextField fieldTunaiCount) {
 		this.fieldTunaiCount = fieldTunaiCount;
 	}
-
 	public TextField getFieldKreditCount() {
 		return fieldKreditCount;
 	}
-
 	public void setFieldKreditCount(TextField fieldKreditCount) {
 		this.fieldKreditCount = fieldKreditCount;
 	}
-
 	public TextField getFieldTunaiSum() {
 		return fieldTunaiSum;
 	}
-
 	public void setFieldTunaiSum(TextField fieldTunaiSum) {
 		this.fieldTunaiSum = fieldTunaiSum;
 	}
-
 	public TextField getFieldKreditSum() {
 		return fieldKreditSum;
 	}
-
 	public void setFieldKreditSum(TextField fieldKreditSum) {
 		this.fieldKreditSum = fieldKreditSum;
 	}
-
 	public TextField getFieldToCount() {
 		return fieldToCount;
 	}
-
 	public void setFieldToCount(TextField fieldToCount) {
 		this.fieldToCount = fieldToCount;
 	}
-
 	public TextField getFieldCanvasCount() {
 		return fieldCanvasCount;
 	}
-
 	public void setFieldCanvasCount(TextField fieldCanvasCount) {
 		this.fieldCanvasCount = fieldCanvasCount;
 	}
-
 	public TextField getFieldToSum() {
 		return fieldToSum;
 	}
-
 	public void setFieldToSum(TextField fieldToSum) {
 		this.fieldToSum = fieldToSum;
 	}
-
 	public TextField getFieldCanvasSum() {
 		return fieldCanvasSum;
 	}
-
 	public void setFieldCanvasSum(TextField fieldCanvasSum) {
 		this.fieldCanvasSum = fieldCanvasSum;
 	}
-
 	public TextField getFieldAmountSum() {
 		return fieldAmountSum;
 	}
-
 	public void setFieldAmountSum(TextField fieldAmountSum) {
 		this.fieldAmountSum = fieldAmountSum;
 	}
-
 	public TextField getFieldAmountPaySum() {
 		return fieldAmountPaySum;
 	}
-
 	public void setFieldAmountPaySum(TextField fieldAmountPaySum) {
 		this.fieldAmountPaySum = fieldAmountPaySum;
 	}
-
 	public Button getBtnSelectRekapNo() {
 		return btnSelectRekapNo;
 	}
-
 	public void setBtnSelectRekapNo(Button btnSelectRekapNo) {
 		this.btnSelectRekapNo = btnSelectRekapNo;
 	}
-
 	public Window getWindowRecapSearch() {
 		return windowRecapSearch;
 	}
-
 	public void setWindowRecapSearch(Window windowRecapSearch) {
 		this.windowRecapSearch = windowRecapSearch;
 	}
-
-	public WhRecapSelectModel getRecapSelectModel() {
+	public ArRecapSelectModel getRecapSelectModel() {
 		return recapSelectModel;
 	}
-
-	public void setRecapSelectModel(WhRecapSelectModel recapSelectModel) {
+	public void setRecapSelectModel(ArRecapSelectModel recapSelectModel) {
 		this.recapSelectModel = recapSelectModel;
 	}
-
-	public WhRecapSelectView getRecapSelectView() {
+	public ArRecapSelectView getRecapSelectView() {
 		return recapSelectView;
 	}
-
-	public void setRecapSelectView(WhRecapSelectView recapSelectView) {
+	public void setRecapSelectView(ArRecapSelectView recapSelectView) {
 		this.recapSelectView = recapSelectView;
 	}
+
 	
-	   
 	
 }

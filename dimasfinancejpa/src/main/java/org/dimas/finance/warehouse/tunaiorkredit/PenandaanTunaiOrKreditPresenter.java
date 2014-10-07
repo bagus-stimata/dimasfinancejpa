@@ -1,4 +1,4 @@
-package org.dimas.finance.warehouse;
+package org.dimas.finance.warehouse.tunaiorkredit;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -11,6 +11,7 @@ import org.dimas.finance.model.ArinvoicePK;
 import org.dimas.finance.model.Arpaymentdetail;
 import org.dimas.finance.model.ArpaymentdetailPK;
 import org.dimas.finance.model.Arpaymentheader;
+import org.dimas.finance.model.Bbankheader;
 import org.dimas.finance.model.Division;
 import org.dimas.finance.model.Salesman;
 import org.dimas.finance.model.modelenum.EnumFormOperationStatus;
@@ -18,8 +19,6 @@ import org.dimas.finance.model.modelenum.EnumHelpOverlayTipe;
 import org.dimas.finance.util.HelpManager;
 import org.dimas.finance.util.HelpOverlay;
 import org.vaadin.dialogs.ConfirmDialog;
-
-import scala.annotation.meta.getter;
 
 import com.vaadin.data.Container.Filter;
 import com.vaadin.data.Item;
@@ -43,18 +42,18 @@ import com.vaadin.ui.Notification;
 import com.vaadin.ui.Table.HeaderClickEvent;
 import com.vaadin.ui.Table.HeaderClickListener;
 
-public class PenandaanTTDPresenter implements ClickListener, ValueChangeListener,  ItemClickListener, Handler {
+public class PenandaanTunaiOrKreditPresenter implements ClickListener, ValueChangeListener,  ItemClickListener, Handler {
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 	
-	private PenandaanTTDModel model;
-	private PenandaanTTDView view;
+	private PenandaanTunaiOrKreditModel model;
+	private PenandaanTunaiOrKreditView view;
 	
 	Arinvoice item = new Arinvoice();
 	
-	public PenandaanTTDPresenter(PenandaanTTDModel model, PenandaanTTDView view){
+	public PenandaanTunaiOrKreditPresenter(PenandaanTunaiOrKreditModel model, PenandaanTunaiOrKreditView view){
 		this.model = model;
 		this.view = view;
 		
@@ -69,36 +68,37 @@ public class PenandaanTTDPresenter implements ClickListener, ValueChangeListener
 		view.getBtnReload().addClickListener(this);
 		view.getBtnSearch().addClickListener(this);
 		
-		view.getBtnSetTertunda().addClickListener(this);
-		view.getBtnBatalTertunda().addClickListener(this);
+		view.getBtnSetTunai().addClickListener(this);
+		view.getBtnSetKredit().addClickListener(this);
 		
 		view.getTable().addValueChangeListener(this);
 		view.getTable().addItemClickListener(this);
 		
 		view.getBtnSelectRekapNo().addClickListener(this);
-		
 		// register action handler (enter and ctrl-n)
 //		view.getPanelUtama().addActionHandler(this);
 //		view.getPanelTop().addActionHandler(this);
 //		view.getPanelTabel().addActionHandler(this);
 //		view.getPanelForm().addActionHandler(this);
 		
-		ValueChangeListener listenerComboTertunda = new ValueChangeListener() {			
+		ValueChangeListener listenerComboTunaiKredit = new ValueChangeListener() {			
 			@Override
 			public void valueChange(ValueChangeEvent event) {
 				// TODO Auto-generated method stub
-				view.getBtnBatalTertunda().setEnabled(false);
-				view.getBtnSetTertunda().setEnabled(false);
-				if (view.getFieldSearchComboTertunda().getValue().equals("TDK")){
-					view.getBtnSetTertunda().setEnabled(true);					
-				} else if (view.getFieldSearchComboTertunda().getValue().equals("TTD")){
-					view.getBtnBatalTertunda().setEnabled(true);					
+				view.getBtnSetKredit().setEnabled(false);
+				view.getBtnSetTunai().setEnabled(false);
+				if (view.getFieldSearchComboTunaiKredit().getValue().equals("K")){
+					view.getBtnSetTunai().setEnabled(true);										
+				} else if (view.getFieldSearchComboTunaiKredit().getValue().equals("T")){
+					view.getBtnSetKredit().setEnabled(true);							
+				}else if (view.getFieldSearchComboTunaiKredit().getValue().equals("S")){
+					view.getBtnSetKredit().setEnabled(true);
+					view.getBtnSetTunai().setEnabled(true);					
 				}
 			}
 		};
-		view.getFieldSearchComboTertunda().setImmediate(true);
-		view.getFieldSearchComboTertunda().addValueChangeListener(listenerComboTertunda);
-		
+		view.getFieldSearchComboTunaiKredit().setImmediate(true);
+		view.getFieldSearchComboTunaiKredit().addValueChangeListener(listenerComboTunaiKredit);
 		
 		HeaderClickListener listenerHeaderTableUtama = new HeaderClickListener() {			
 			@Override
@@ -146,6 +146,7 @@ public class PenandaanTTDPresenter implements ClickListener, ValueChangeListener
 	public void initListenerSubWindow(){
 		
 	}
+	
 	public void initListenerWindowRecapSelect(){
 		ClickListener closeListener = new ClickListener() {
 			
@@ -187,10 +188,10 @@ public class PenandaanTTDPresenter implements ClickListener, ValueChangeListener
 			printForm();
 		} else if (event.getButton() == view.getBtnHelp()){
 			helpForm();
-		} else if (event.getButton() == view.getBtnSetTertunda()){			
-			 final ConfirmDialog d = ConfirmDialog.show(view.getUI(),"Konfirmasi Pengiriman", "CHECK ULANG SEBELUM MENANDAI TERTUNDA, "
-			 		+ " YAKIN TANDAI TERTUNDA? ", 
-					 "OK Tertunda", "Cancel", konfirmDialogTertundaListener);
+		} else if (event.getButton() == view.getBtnSetTunai()){			
+			 final ConfirmDialog d = ConfirmDialog.show(view.getUI(),"Konfirmasi Tunai/Kredit", "CHECK ULANG SEBELUM MENANDAI TUNAI, "
+			 		+ " YAKIN TANDAI TUNAI? ", 
+					 "Tunai", "Cancel", konfirmDialogTunaiListener);
 			 
 			   final ShortcutListener enter = new ShortcutListener("Oke",
 		                KeyCode.ENTER, null) {
@@ -205,9 +206,9 @@ public class PenandaanTTDPresenter implements ClickListener, ValueChangeListener
 			 d.getCancelButton().setStyleName("small");
 			 d.focus();
 			
-		} else if (event.getButton() == view.getBtnBatalTertunda()){
-			 final ConfirmDialog d = ConfirmDialog.show(view.getUI(),"Konfirmasi Batal Tertunda", "BATALKAN PENANDAAN TERTUNDA?: ", 
-					 "Batalkan", "Cancel", konfirmDialogBatalTertundaListener);
+		} else if (event.getButton() == view.getBtnSetKredit()){
+			 final ConfirmDialog d = ConfirmDialog.show(view.getUI(),"Konfirmasi Kredit", "CHECK ULANG SEBELUM MENANDAI KREDIT", 
+					 "Kredit", "Cancel", konfirmDialogKreditListener);
 			 
 			   final ShortcutListener enter = new ShortcutListener("Oke",
 		                KeyCode.ENTER, null) {
@@ -222,10 +223,10 @@ public class PenandaanTTDPresenter implements ClickListener, ValueChangeListener
 			 d.getCancelButton().setStyleName("small");
 			 d.focus();
 			
+		
 		} else if (event.getButton() == view.getBtnSelectRekapNo()){
 			windowRecapSelectShow();
 		}
-
 		
 		//Tidak semua akan di refresh container nya >> Jadi refresh container tidak bisa di taruh disini
 		
@@ -251,7 +252,6 @@ public class PenandaanTTDPresenter implements ClickListener, ValueChangeListener
 		//3. Filter Default
 		model.setFilterDefaultBeanItemContainer();
 		
-
 		//PARSING RECAPNO
 		String recapNo = view.getFieldSearchByRekap().getValue().toString().trim();
 		if (! recapNo.trim().equals("")){
@@ -303,14 +303,14 @@ public class PenandaanTTDPresenter implements ClickListener, ValueChangeListener
 		//LUNAS BELUM LUNAS
 		Filter filter7=null;
 		try{
-			if (view.getFieldSearchComboTertunda().getValue().equals("TDK")){
-				filter7 = new And(new Compare.Equal("tertundacounter", 0)); 					
-			} else if (view.getFieldSearchComboTertunda().getValue().equals("TTD")){
-				filter7 = new And(new Compare.Greater("tertundacounter", 0)); 						
+			if (view.getFieldSearchComboTerkirim().getValue().equals("B")){
+				filter7 = new And(new Compare.Equal("terkirim", false)); 					
+			} else if (view.getFieldSearchComboTerkirim().getValue().equals("K")){
+				filter7 = new And(new Compare.Equal("terkirim", true)); 						
 			}
 			
 			
-			if (! view.getFieldSearchComboTertunda().getValue().equals("S")){
+			if (! view.getFieldSearchComboTerkirim().getValue().equals("S")){
 				model.getTableBeanItemContainer().addContainerFilter(filter7);
 			}
 		} catch(Exception ex){
@@ -343,6 +343,33 @@ public class PenandaanTTDPresenter implements ClickListener, ValueChangeListener
 			}	
 		} catch(Exception ex){}
 			
+		
+//		//TUNAI ATAU KREDIT
+		Filter filter10=null;
+		try{
+			if (view.getFieldSearchComboTunaiKredit().getValue().equals("T")){
+				filter10 = new And(new Compare.Equal("tunaikredit", "T")); 					
+			} else if (view.getFieldSearchComboTunaiKredit().getValue().equals("K")){
+				filter10 = new And(new Compare.Equal("tunaikredit", "K")); 						
+			}
+			
+			if (! view.getFieldSearchComboTunaiKredit().getValue().equals("S")){
+				model.getTableBeanItemContainer().addContainerFilter(filter10);
+			}
+		} catch(Exception ex){
+			ex.printStackTrace();
+		}
+		
+//		
+//		String tunaiOrKredit = "T";
+//		if (view.getCheckTunai().getValue() ==false){
+//			tunaiOrKredit = "K";
+//		}
+//		Filter filter8 = new And(new Compare.Equal("tunaikredit", tunaiOrKredit));
+//		model.getTableBeanItemContainer().addContainerFilter(filter8);
+		
+		
+		
 		//3. Refresh container dengan kondisi filter
 //		model.setFreshDataTable();
 		//CURRENTLY UN CHECK
@@ -355,33 +382,33 @@ public class PenandaanTTDPresenter implements ClickListener, ValueChangeListener
 		return 0;
 	}
 
-    ConfirmDialog.Listener konfirmDialogTertundaListener = new ConfirmDialog.Listener() {					
+    ConfirmDialog.Listener konfirmDialogTunaiListener = new ConfirmDialog.Listener() {					
 		//@Override
 		public void onClose(ConfirmDialog dialog) {
 			
             if (dialog.isConfirmed()) {
                 // Confirmed to continue
-            	tandaiTertunda();
+            	tandaiTunai();
             } else {
             // User did not confirm
             }
 		}
 	};
 
-    ConfirmDialog.Listener konfirmDialogBatalTertundaListener = new ConfirmDialog.Listener() {					
+    ConfirmDialog.Listener konfirmDialogKreditListener = new ConfirmDialog.Listener() {					
 		//@Override
 		public void onClose(ConfirmDialog dialog) {
 			
             if (dialog.isConfirmed()) {
                 // Confirmed to continue
-            	batalTertunda();
+            	tandaiKredit();
             } else {
             // User did not confirm
             }
 		}
 	};
 	
-	public void tandaiTertunda(){
+	public void tandaiTunai(){
 	
 		try{
 			int nomorUrut=0;
@@ -395,55 +422,44 @@ public class PenandaanTTDPresenter implements ClickListener, ValueChangeListener
 
 				if (item.getSelected().getValue()==true && item.isLunas() == false ){
 					
-					//UPDATE INVOICE PENAMBAHAN TANGGAL TERTUNDA TIDAK BOLEH MELEBIHI TANGGAL TRANSAKSI + 1
-					
-					Date tglTransaksiBerjalan = 
-							model.getManagerTransaksi().getCurrentTanggalTransaksiBerjalan(item.getDivisionBean());
-					Calendar calTomorrow = Calendar.getInstance();
-					calTomorrow.setTime(tglTransaksiBerjalan);
-					//ACTUAL DUE DATE DIMAJUKAN 
-					calTomorrow.add(Calendar.DATE, 1 + item.getTerm());
-					
+					//UPDATE INVOICE
+//					item.setTerkirim(true);
 					Calendar cal = Calendar.getInstance();
-					cal.setTime(item.getActualduedate());
-					cal.add(Calendar.DATE, 1);
+					cal.setTime(item.getInvoicedate());
+					cal.set(Calendar.DATE, 1);
+					Date tomorrowDate = cal.getTime();			
 					
-					System.out.println(item.getActualduedate());
-					System.out.println(calTomorrow.getTime());
+					item.setTunaikredit("T");
+					item.setTerm(1);
+					item.setDuedate(tomorrowDate);
+					item.setActualduedate(tomorrowDate);
 					
-					if ( item.getActualduedate().getTime() <= calTomorrow.getTime().getTime()) {
-						
-						item.setActualduedate(cal.getTime());						
-						item.setTertundacounter(item.getTertundacounter()+1);
-						
-						model.getArInvoiceService().updateObject(item);
-						
-						nomorUrut +=1;
-						//REFRESH SATU PERSATU
-						listObject.add(itemId);
-					}
-						
+					model.getArInvoiceService().updateObject(item);
+					nomorUrut +=1;
+					
+					listObject.add(itemId);
 					
 				}
 			
 			}
+			
 			//REFRESH FROM
 			view.getBtnSearch().click();
 			
 			if (nomorUrut>0){
-				Notification.show("Sejumlah " + nomorUrut + " Nota berhasil diberi tanda TERTUNDA!");
+				Notification.show("Sejumlah " + nomorUrut + " Nota berhasil diberi tanda TUNAI");
 			} else {
-				Notification.show("TIDAK ADA FAKTUR YANG DITANDAI TERTUNDA");				
+				Notification.show("TIDAK ADA FAKTUR YANG DITANDAI TUNAI");				
 			}
 			view.setDisplayFooter();
 			
 		} catch(Exception ex){
-			Notification.show("Error Tertunda!!");		                        		
+			Notification.show("Error Penandaan!!");		                        		
 			
 		}
 	}
 
-	public void batalTertunda(){
+	public void tandaiKredit(){
 		
 		try{
 			int nomorUrut=0;
@@ -452,50 +468,62 @@ public class PenandaanTTDPresenter implements ClickListener, ValueChangeListener
 
 			for (Object itemId: itemIds){
 				
-				Arinvoice item = new Arinvoice();
-				item = model.getTableBeanItemContainer().getItem(itemId).getBean();
+				Arinvoice itemArinvoice = new Arinvoice();
+				itemArinvoice = model.getTableBeanItemContainer().getItem(itemId).getBean();
 
-				if (item.getSelected().getValue()==true && item.isLunas() == false ){
+				if (itemArinvoice.getSelected().getValue()==true && itemArinvoice.isLunas() == false ){
 					
-					Date tglTransaksiBerjalan = 
-							model.getManagerTransaksi().getCurrentTanggalTransaksiBerjalan(item.getDivisionBean());
-					//UPDATE INVOICE
-					if (item.getTertundacounter() > 0){
-						
-						Calendar cal = Calendar.getInstance();
-						cal.setTime(item.getActualduedate());
-						cal.add(Calendar.DATE, -1 - item.getTerm());
-						
-						if ( item.getActualduedate().getTime() > tglTransaksiBerjalan.getTime()) {						
-
-							item.setActualduedate(cal.getTime());
-							item.setTertundacounter(item.getTertundacounter()-1);
-
-							model.getArInvoiceService().updateObject(item);
-							
-							nomorUrut +=1;
-							//REFRESH SATU PERSATU
-							listObject.add(itemId);
-						}
+					Division division = new Division();
+					try{
+						division = itemArinvoice.getDivisionBean();
+					} catch(Exception ex){}{
 						
 					}
+					//UPDATE INVOICE
+//					item.setTerkirim(true);
+					Calendar cal = Calendar.getInstance();
+					cal.setTime(itemArinvoice.getInvoicedate());
+					
+					int newTerm = 7;
+					try{
+						newTerm = model.getManagerTransaksi().getOverdueDefault(division);					
+					} catch(Exception ex){
+						ex.printStackTrace();
+					}
+					
+					
+					cal.add(Calendar.DATE, newTerm);
+					Date newOverdueDate = cal.getTime();			
+					
+					System.out.println("Tanggal" + itemArinvoice.getInvoicedate() + "\t" + cal.getTime() + "\t" + item.getDuedate());
+					
+					itemArinvoice.setTunaikredit("K");
+					itemArinvoice.setTerm(newTerm);
+					itemArinvoice.setDuedate(newOverdueDate);
+					itemArinvoice.setActualduedate(newOverdueDate);
+					
+					model.getArInvoiceService().updateObject(itemArinvoice);
+					nomorUrut +=1;
+					
+					listObject.add(itemId);
 					
 				}
 			
 			}
+			
 			//REFRESH FROM
 			view.getBtnSearch().click();
 			
-			if (nomorUrut > 0){
-				Notification.show("Sejumlah " + nomorUrut + " Nota berhasil DIBATALKAN TERTUNDA!");
+			if (nomorUrut>0){
+				Notification.show("Sejumlah " + nomorUrut + " Nota berhasil diberi tanda KREDIT");
 			} else {
-				Notification.show("TIDAK ADA FAKTUR TERTUNDA YANG DIBATALKAN");
-				
+				Notification.show("TIDAK ADA FAKTUR YANG DITANDAI KREDIT");				
 			}
 			view.setDisplayFooter();
 			
+			
 		} catch(Exception ex){
-			Notification.show("Error Tertunda!!");		                        		
+			Notification.show("Error Penandaan!!");		                        		
 			
 		}
 	}
@@ -564,6 +592,24 @@ public class PenandaanTTDPresenter implements ClickListener, ValueChangeListener
 	@Override
 	public void itemClick(ItemClickEvent event) {
 		// TODO Auto-generated method stub
+
+//		try{
+//			Object itemId = event.getItemId();
+//			model.item = model.getTableBeanItemContainer().getItem(itemId).getBean();			
+//			itemTableSelected = view.getTable().getItem(itemId);
+//			
+//			model.getTableBeanItemContainer().getItem(itemId).getBean().getSelected().setReadOnly(false);
+//			if (model.getItem().getSelected().getValue()==true){
+//				model.getTableBeanItemContainer().getItem(itemId).getBean().getSelected().setValue(false);
+//			} else {
+//				model.getTableBeanItemContainer().getItem(itemId).getBean().getSelected().setValue(true);				
+//			}
+//			view.setDisplayFooter();
+//			
+//			boolean entitySelected = item != null;
+//		} catch (Exception ex){}
+//		
+//		// modify visibility of form and delete button if an item is selected
 		
 	}
 

@@ -1,4 +1,4 @@
-package org.dimas.finance.warehouse;
+package org.dimas.finance.ar.jatuhtempomanual;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -43,7 +43,7 @@ import com.vaadin.data.util.filter.Or;
 import com.vaadin.data.util.filter.SimpleStringFilter;
 import com.vaadin.data.util.filter.Compare.Equal;
 
-public class PenandaanKirimModel implements Serializable{
+public class JatuhTempoManualModel implements Serializable{
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -74,7 +74,7 @@ public class PenandaanKirimModel implements Serializable{
 	private boolean selectAllInvoice;
 	private TransaksiHelper managerTransaksi = new TransaksiHelper();
 	
-	public PenandaanKirimModel(){
+	public JatuhTempoManualModel(){
 		initVariable();		
 		initVariableData();
 	}
@@ -166,7 +166,7 @@ public class PenandaanKirimModel implements Serializable{
 		Filter filter = new Not(new Compare.Equal("lunas", true));
 		tableBeanItemContainer.addContainerFilter(filter);
 		
-		Filter filterNotCanvas = new Not(new SimpleStringFilter("tipejual", "C", true, false));
+		Filter filterNotCanvas = new And(new Not(new SimpleStringFilter("tipejual", "C", true, false)));
 		tableBeanItemContainer.addContainerFilter(filterNotCanvas);
 		
 	}

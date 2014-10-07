@@ -21,5 +21,7 @@ public interface ArInvoiceJpaService extends GenericJpaService<Arinvoice, Serial
 	public List<Arinvoice> findAllForRecapSelectArTOTunai(String recapno, String division, Date invoiceDateFromAndTo);
 	public List<Arinvoice> findAllForRecapSelectArTOTunai(String recapno, String division, Date invoiceDateFrom, Date invoiceDateTo);
 	
+
+	public List<Arinvoice> findAllByIdPk(ArinvoicePK id);
 	
 }

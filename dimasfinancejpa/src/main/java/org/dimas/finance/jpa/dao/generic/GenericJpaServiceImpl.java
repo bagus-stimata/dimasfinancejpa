@@ -10,6 +10,7 @@ import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.FlushModeType;
 import javax.persistence.Persistence;
 import javax.persistence.PersistenceException;
 
@@ -87,7 +88,7 @@ public class GenericJpaServiceImpl<T, ID extends Serializable> implements Generi
             try {
                 em.getTransaction().begin();
                 em.persist(domain);
-                em.getTransaction().commit();
+                em.getTransaction().commit();               
             } catch (PersistenceException exception) {
                 em.getTransaction().rollback();
                 throw exception;

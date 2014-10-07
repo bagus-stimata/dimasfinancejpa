@@ -99,7 +99,7 @@ public class PenandaanTTDView extends CustomComponent {
 	}
 	
 	public void initComponent(){
-//		table = new Table("Table:", model.getTableJpaContainer());		
+//		table = new Table("Table:", model.getTableBeanItemContainer());		
 		
 		table = new Table("Table: ") {
 		    @Override
@@ -408,8 +408,7 @@ public class PenandaanTTDView extends CustomComponent {
 	
 	public void setDisplay(){
 		//1. Refresh Table displa
-//		table.setContainerDataSource(model.getTableBeanItemContainer());
-		table.setContainerDataSource(model.getTableJpaContainer());
+		table.setContainerDataSource(model.getTableBeanItemContainer());
 		
 		//2. Jika table masih dalam kondisi di seleksi maka form masih diisi dengan hasil seleksi
 		
@@ -442,10 +441,10 @@ public class PenandaanTTDView extends CustomComponent {
 		double sumAmountSelected=0;
 		double sumAmountPaySelected=0;
 		
-		Collection itemIds =  model.getTableJpaContainer().getItemIds();
+		Collection itemIds =  model.getTableBeanItemContainer().getItemIds();
 		for (Object itemId: itemIds){
 			Arinvoice item = new Arinvoice();
-			item = model.getTableJpaContainer().getItem(itemId).getEntity();
+			item = model.getTableBeanItemContainer().getItem(itemId).getBean();
 			sumAmount += item.getAmount();
 			sumAmountPay += item.getAmountpay();
 			if (item.isLunas()==true){

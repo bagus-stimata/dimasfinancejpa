@@ -375,7 +375,7 @@ public class BukuGiroPresenter implements ClickListener, ValueChangeListener{
 	public int searchForm(){
 		//1. Remove filter dan Refresh container dalulu dahulu
 		model.reload();
-		model.getBeanItemContainerBukugiro().removeAllContainerFilters();
+//		model.getBeanItemContainerBukugiro().removeAllContainerFilters();
 		
 		//2. Baru Kasih Filter Lagi
 //		String theRefno = view.getFieldSearchByRefno().getValue().toString().trim();

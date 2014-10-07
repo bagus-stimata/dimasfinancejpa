@@ -1,26 +1,28 @@
-package org.dimas.finance.warehouse;
+package org.dimas.finance.ar.tunai;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+
+import javax.swing.plaf.basic.BasicComboBoxUI.ItemHandler;
 
 import org.dimas.finance.model.Arinvoice;
 import org.dimas.finance.model.ArinvoicePK;
 import org.dimas.finance.model.Arpaymentdetail;
 import org.dimas.finance.model.ArpaymentdetailPK;
 import org.dimas.finance.model.Arpaymentheader;
+import org.dimas.finance.model.ArpaymentheaderPK;
 import org.dimas.finance.model.Division;
 import org.dimas.finance.model.Salesman;
 import org.dimas.finance.model.modelenum.EnumFormOperationStatus;
 import org.dimas.finance.model.modelenum.EnumHelpOverlayTipe;
+import org.dimas.finance.util.FormatAndConvertionUtil;
 import org.dimas.finance.util.HelpManager;
 import org.dimas.finance.util.HelpOverlay;
 import org.vaadin.dialogs.ConfirmDialog;
 
-import scala.annotation.meta.getter;
-
+import com.vaadin.addon.jpacontainer.JPAContainerFactory;
 import com.vaadin.data.Container.Filter;
 import com.vaadin.data.Item;
 import com.vaadin.data.Property.ValueChangeEvent;
@@ -43,18 +45,18 @@ import com.vaadin.ui.Notification;
 import com.vaadin.ui.Table.HeaderClickEvent;
 import com.vaadin.ui.Table.HeaderClickListener;
 
-public class PenandaanTTDPresenter implements ClickListener, ValueChangeListener,  ItemClickListener, Handler {
+public class PelunasanTunaiPresenter implements ClickListener, ValueChangeListener,  Handler {
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 	
-	private PenandaanTTDModel model;
-	private PenandaanTTDView view;
+	private PelunasanTunaiModel model;
+	private PelunasanTunaiView view;
 	
 	Arinvoice item = new Arinvoice();
 	
-	public PenandaanTTDPresenter(PenandaanTTDModel model, PenandaanTTDView view){
+	public PelunasanTunaiPresenter(PelunasanTunaiModel model, PelunasanTunaiView view){
 		this.model = model;
 		this.view = view;
 		
@@ -69,11 +71,10 @@ public class PenandaanTTDPresenter implements ClickListener, ValueChangeListener
 		view.getBtnReload().addClickListener(this);
 		view.getBtnSearch().addClickListener(this);
 		
-		view.getBtnSetTertunda().addClickListener(this);
-		view.getBtnBatalTertunda().addClickListener(this);
+		view.getBtnLunaskan().addClickListener(this);
+		view.getBtnBatalLunaskan().addClickListener(this);
 		
 		view.getTable().addValueChangeListener(this);
-		view.getTable().addItemClickListener(this);
 		
 		view.getBtnSelectRekapNo().addClickListener(this);
 		
@@ -83,22 +84,21 @@ public class PenandaanTTDPresenter implements ClickListener, ValueChangeListener
 //		view.getPanelTabel().addActionHandler(this);
 //		view.getPanelForm().addActionHandler(this);
 		
-		ValueChangeListener listenerComboTertunda = new ValueChangeListener() {			
+		ValueChangeListener listenerComboLunas = new ValueChangeListener() {			
 			@Override
 			public void valueChange(ValueChangeEvent event) {
 				// TODO Auto-generated method stub
-				view.getBtnBatalTertunda().setEnabled(false);
-				view.getBtnSetTertunda().setEnabled(false);
-				if (view.getFieldSearchComboTertunda().getValue().equals("TDK")){
-					view.getBtnSetTertunda().setEnabled(true);					
-				} else if (view.getFieldSearchComboTertunda().getValue().equals("TTD")){
-					view.getBtnBatalTertunda().setEnabled(true);					
+				view.getBtnBatalLunaskan().setEnabled(false);
+				view.getBtnLunaskan().setEnabled(false);
+				if (view.getFieldSearchComboLunas().getValue().equals("B")){
+					view.getBtnLunaskan().setEnabled(true);					
+				} else if (view.getFieldSearchComboLunas().getValue().equals("L")){
+					view.getBtnBatalLunaskan().setEnabled(true);					
 				}
 			}
 		};
-		view.getFieldSearchComboTertunda().setImmediate(true);
-		view.getFieldSearchComboTertunda().addValueChangeListener(listenerComboTertunda);
-		
+		view.getFieldSearchComboLunas().setImmediate(true);
+		view.getFieldSearchComboLunas().addValueChangeListener(listenerComboLunas);
 		
 		HeaderClickListener listenerHeaderTableUtama = new HeaderClickListener() {			
 			@Override
@@ -146,6 +146,7 @@ public class PenandaanTTDPresenter implements ClickListener, ValueChangeListener
 	public void initListenerSubWindow(){
 		
 	}
+	
 	public void initListenerWindowRecapSelect(){
 		ClickListener closeListener = new ClickListener() {
 			
@@ -187,10 +188,26 @@ public class PenandaanTTDPresenter implements ClickListener, ValueChangeListener
 			printForm();
 		} else if (event.getButton() == view.getBtnHelp()){
 			helpForm();
-		} else if (event.getButton() == view.getBtnSetTertunda()){			
-			 final ConfirmDialog d = ConfirmDialog.show(view.getUI(),"Konfirmasi Pengiriman", "CHECK ULANG SEBELUM MENANDAI TERTUNDA, "
-			 		+ " YAKIN TANDAI TERTUNDA? ", 
-					 "OK Tertunda", "Cancel", konfirmDialogTertundaListener);
+		} else if (event.getButton() == view.getBtnLunaskan()){			
+			 final ConfirmDialog d = ConfirmDialog.show(view.getUI(),"Konfirmasi Pelunasan", "CHECK ULANG SEBELUM MELUNASKAN, YAKIN LUNASKAN? ", 
+					 "Oke Lunaskan", "Cancel", konfirmDialogLunaskanListener);
+			 
+			   final ShortcutListener enter = new ShortcutListener("Oke",
+		                KeyCode.ENTER, null) {
+		            @Override
+		            public void handleAction(Object sender, Object target) {
+		            	d.close();
+		            }
+		        };
+			
+			 d.setStyleName("dialog");
+			 d.getOkButton().setStyleName("small");
+				 d.getCancelButton().setStyleName("small");
+				 d.focus();
+			
+		} else if (event.getButton() == view.getBtnBatalLunaskan()){
+			 final ConfirmDialog d = ConfirmDialog.show(view.getUI(),"Konfirmasi Batal Pelunasan", "BATALKAN PELUNASAN NOTA?: ", 
+					 "Batalkan", "Cancel", konfirmDialogBatalLunaskanListener);
 			 
 			   final ShortcutListener enter = new ShortcutListener("Oke",
 		                KeyCode.ENTER, null) {
@@ -205,27 +222,10 @@ public class PenandaanTTDPresenter implements ClickListener, ValueChangeListener
 			 d.getCancelButton().setStyleName("small");
 			 d.focus();
 			
-		} else if (event.getButton() == view.getBtnBatalTertunda()){
-			 final ConfirmDialog d = ConfirmDialog.show(view.getUI(),"Konfirmasi Batal Tertunda", "BATALKAN PENANDAAN TERTUNDA?: ", 
-					 "Batalkan", "Cancel", konfirmDialogBatalTertundaListener);
-			 
-			   final ShortcutListener enter = new ShortcutListener("Oke",
-		                KeyCode.ENTER, null) {
-		            @Override
-		            public void handleAction(Object sender, Object target) {
-		            	d.close();
-		            }
-		        };
-			
-			 d.setStyleName("dialog");
-			 d.getOkButton().setStyleName("small");
-			 d.getCancelButton().setStyleName("small");
-			 d.focus();
-			
+		
 		} else if (event.getButton() == view.getBtnSelectRekapNo()){
 			windowRecapSelectShow();
-		}
-
+		}	
 		
 		//Tidak semua akan di refresh container nya >> Jadi refresh container tidak bisa di taruh disini
 		
@@ -265,7 +265,7 @@ public class PenandaanTTDPresenter implements ClickListener, ValueChangeListener
 			model.getTableBeanItemContainer().addContainerFilter(filter2);
 			
 		}
-
+		
 		
 		//JIKA TIDAK DIPILIH YA KOSONG
 		String strDivision="";
@@ -275,7 +275,7 @@ public class PenandaanTTDPresenter implements ClickListener, ValueChangeListener
 			strDivision = div.getId();		
 		} catch(Exception ex){}
 		try{
-			if (! strDivision.trim().equals("")){
+			if (! strDivision.trim().equals("")){	
 //				Filter filter3 = new And(new SimpleStringFilter("id.division", strDivision, true, false));
 				Filter filter3 = new And(new Compare.Equal("divisionBean", div));
 				model.getTableBeanItemContainer().addContainerFilter(filter3);
@@ -303,14 +303,14 @@ public class PenandaanTTDPresenter implements ClickListener, ValueChangeListener
 		//LUNAS BELUM LUNAS
 		Filter filter7=null;
 		try{
-			if (view.getFieldSearchComboTertunda().getValue().equals("TDK")){
-				filter7 = new And(new Compare.Equal("tertundacounter", 0)); 					
-			} else if (view.getFieldSearchComboTertunda().getValue().equals("TTD")){
-				filter7 = new And(new Compare.Greater("tertundacounter", 0)); 						
+			if (view.getFieldSearchComboLunas().getValue().equals("B")){
+				filter7 = new And(new Compare.Equal("lunas", false)); 					
+			} else if (view.getFieldSearchComboLunas().getValue().equals("L")){
+				filter7 = new And(new Compare.Equal("lunas", true)); 						
 			}
 			
 			
-			if (! view.getFieldSearchComboTertunda().getValue().equals("S")){
+			if (! view.getFieldSearchComboLunas().getValue().equals("S")){
 				model.getTableBeanItemContainer().addContainerFilter(filter7);
 			}
 		} catch(Exception ex){
@@ -355,149 +355,222 @@ public class PenandaanTTDPresenter implements ClickListener, ValueChangeListener
 		return 0;
 	}
 
-    ConfirmDialog.Listener konfirmDialogTertundaListener = new ConfirmDialog.Listener() {					
+    ConfirmDialog.Listener konfirmDialogLunaskanListener = new ConfirmDialog.Listener() {					
 		//@Override
 		public void onClose(ConfirmDialog dialog) {
 			
             if (dialog.isConfirmed()) {
                 // Confirmed to continue
-            	tandaiTertunda();
+            	
+        		FormatAndConvertionUtil myFormatUtil = new FormatAndConvertionUtil();
+        		Double totalYangHarusBayar = myFormatUtil.convertStringToDouble((String) view.getFieldAmountSum().getConvertedValue());
+        		Double totalKurangLebihBayar = myFormatUtil.convertStringToDouble((String) view.getFieldAmountPaySum().getConvertedValue());
+
+        		if (! totalYangHarusBayar.equals(totalKurangLebihBayar)){
+        			 final ConfirmDialog d = ConfirmDialog.show(view.getUI(),"Konfirmasi Pelunasan TO TUNAI", 
+        					 "Kurang Lebih Bayar Rp. "  + (totalKurangLebihBayar - totalYangHarusBayar) + "! Yakin Lanjutkan!?", 
+        					 "Yes", "No", konfirmDialogKurangLebihBayarListener);
+        			 
+        			   final ShortcutListener enter = new ShortcutListener("Oke",
+        		                KeyCode.ENTER, null) {
+        		            @Override
+        		            public void handleAction(Object sender, Object target) {
+        		            	d.close();
+        		            }
+        		        };
+        			
+        			 d.setStyleName("dialog");
+        			 d.getOkButton().setStyleName("small");
+        			 d.getCancelButton().setStyleName("small");
+        			 d.focus();
+        			
+        		}else {
+        			lunaskan();
+        		}
             } else {
             // User did not confirm
             }
 		}
 	};
-
-    ConfirmDialog.Listener konfirmDialogBatalTertundaListener = new ConfirmDialog.Listener() {					
-		//@Override
+	ConfirmDialog.Listener konfirmDialogKurangLebihBayarListener = new ConfirmDialog.Listener() {					
+		@Override
 		public void onClose(ConfirmDialog dialog) {
 			
             if (dialog.isConfirmed()) {
-                // Confirmed to continue
-            	batalTertunda();
+            	// Confirmed to continue
+            	lunaskan();
             } else {
             // User did not confirm
             }
 		}
 	};
 	
-	public void tandaiTertunda(){
-	
-		try{
-			int nomorUrut=0;
-			Collection itemIds =  model.getTableBeanItemContainer().getItemIds();
-			List<Object> listObject = new ArrayList<Object>();
 
-			for (Object itemId: itemIds){
+    ConfirmDialog.Listener konfirmDialogBatalLunaskanListener = new ConfirmDialog.Listener() {					
+		//@Override
+		public void onClose(ConfirmDialog dialog) {
+			
+            if (dialog.isConfirmed()) {
+                // Confirmed to continue
+            	batalLunaskan();
+            } else {
+            // User did not confirm
+            }
+		}
+	};
+
+	public void lunaskan(){
+		
+			FormatAndConvertionUtil myFormatUtil = new FormatAndConvertionUtil();
+			Double totalKurangLebihBayar = myFormatUtil.convertStringToDouble((String) view.getFieldAmountPaySum().getConvertedValue());
+			
+			try{
+				//KONSEP ONE-HEADER --> MANY DETAIL
+				Division division = new Division();
+				try{
+					division = model.getBeanItemContainerDivision().getItem(view.getFieldSearchComboDivisi().getConvertedValue()).getBean();
+				} catch(Exception ex){}
 				
-				Arinvoice item = new Arinvoice();
-				item = model.getTableBeanItemContainer().getItem(itemId).getBean();
+				String newRefno = model.getManagerTransaksi().getNewNomorUrutArPayment(division);
+				//1. BUAT HEADER
+				Arpaymentheader itemArpaymentHeader = new Arpaymentheader();
+				ArpaymentheaderPK id = new ArpaymentheaderPK();
+				id.setRefno(newRefno);
+				id.setDivision(division.getId());
+				itemArpaymentHeader.setId(id);				
+				
+				itemArpaymentHeader.setDivisionBean(division);
+				itemArpaymentHeader.setEntrydate(new Date());
+				itemArpaymentHeader.setTransdate(model.getManagerTransaksi().getCurrentTanggalTransaksiBerjalan(division));
+				
+				itemArpaymentHeader.setUserid("admin");
+				itemArpaymentHeader.setClosing(false);			
+				
+				model.getArpaymentHeaderService().createObject(itemArpaymentHeader);
+				
+				//SYARAT INVOICE DILUNASKAN
+				//1. Diseleksi dari Table
+				//2. Belum Lunas
+				List<Object> listItemProses = new ArrayList<Object>();				
+				int nomorUrut=0;
+				Collection itemIds =  model.getTableBeanItemContainer().getItemIds();				
+				Arinvoice itemDummyArinvoice = new Arinvoice();
+				for (Object itemId: itemIds){
+					
+					Arinvoice itemArinvoice = new Arinvoice();
+					itemArinvoice = model.getTableBeanItemContainer().getItem(itemId).getBean();
 
-				if (item.getSelected().getValue()==true && item.isLunas() == false ){
-					
-					//UPDATE INVOICE PENAMBAHAN TANGGAL TERTUNDA TIDAK BOLEH MELEBIHI TANGGAL TRANSAKSI + 1
-					
-					Date tglTransaksiBerjalan = 
-							model.getManagerTransaksi().getCurrentTanggalTransaksiBerjalan(item.getDivisionBean());
-					Calendar calTomorrow = Calendar.getInstance();
-					calTomorrow.setTime(tglTransaksiBerjalan);
-					//ACTUAL DUE DATE DIMAJUKAN 
-					calTomorrow.add(Calendar.DATE, 1 + item.getTerm());
-					
-					Calendar cal = Calendar.getInstance();
-					cal.setTime(item.getActualduedate());
-					cal.add(Calendar.DATE, 1);
-					
-					System.out.println(item.getActualduedate());
-					System.out.println(calTomorrow.getTime());
-					
-					if ( item.getActualduedate().getTime() <= calTomorrow.getTime().getTime()) {
+					if (itemArinvoice.getSelected().getValue()==true && itemArinvoice.isLunas() == false ){
+						Arpaymentdetail itemArpaymentDetail = new Arpaymentdetail();
 						
-						item.setActualduedate(cal.getTime());						
-						item.setTertundacounter(item.getTertundacounter()+1);
+						ArpaymentdetailPK itemDetailPK = new ArpaymentdetailPK();
+						itemDetailPK.setRefno(newRefno);
+						itemDetailPK.setInvoiceno(itemArinvoice.getId().getInvoiceno());
+						itemDetailPK.setDivision(itemArinvoice.getId().getDivision());
+						nomorUrut++;
+						itemDetailPK.setNumber(nomorUrut);	
+						itemArpaymentDetail.setId(itemDetailPK);
 						
-						model.getArInvoiceService().updateObject(item);
+						itemArpaymentDetail.setDivisionBean(itemArinvoice.getDivisionBean());
+						itemArpaymentDetail.setInvoiceBean(itemArinvoice);
 						
-						nomorUrut +=1;
-						//REFRESH SATU PERSATU
-						listObject.add(itemId);
-					}
+						double jumlahBayar = itemArinvoice.getAmount() - itemArinvoice.getAmountpay();
+						itemArpaymentDetail.setCashamountpay(jumlahBayar);
+						//Hitung Kurang Lebih Bayar
+						totalKurangLebihBayar -= jumlahBayar;
+						//UPADATE DETAIL
+						model.getArpaymentDetailService().updateObject(itemArpaymentDetail);
 						
-					
+						//UPDATE INVOICE
+						itemArinvoice.setAmountpay(itemArinvoice.getAmount());
+						itemArinvoice.setLunas(true);
+						model.getArInvoiceService().updateObject(itemArinvoice);
+
+						//Untuk kurang lebih
+						itemDummyArinvoice = new Arinvoice();
+						itemDummyArinvoice = itemArinvoice;
+						
+						listItemProses.add(itemId);
+						
+					}				
 				}
-			
+				//UPDATE Kurang lebih pembayaran
+				
+				itemDummyArinvoice.setAmountpay(itemDummyArinvoice.getAmountpay() + totalKurangLebihBayar);
+				model.getArInvoiceService().updateObject(itemDummyArinvoice);
+				//REFRESH FROM
+				view.getBtnSearch().click();
+				Notification.show("Sejumlah " + listItemProses.size() + " Nota berhasil dilunaskan!");
+				
+				view.setDisplayFooter();
+				
+			} catch(Exception ex){
+    			Notification.show("Error Pelunasan!!");		                        		
+				ex.printStackTrace();
 			}
-			//REFRESH FROM
-			view.getBtnSearch().click();
-			
-			if (nomorUrut>0){
-				Notification.show("Sejumlah " + nomorUrut + " Nota berhasil diberi tanda TERTUNDA!");
-			} else {
-				Notification.show("TIDAK ADA FAKTUR YANG DITANDAI TERTUNDA");				
-			}
-			view.setDisplayFooter();
-			
-		} catch(Exception ex){
-			Notification.show("Error Tertunda!!");		                        		
-			
-		}
 	}
 
-	public void batalTertunda(){
+	public void batalLunaskan(){
 		
-		try{
-			int nomorUrut=0;
-			Collection itemIds =  model.getTableBeanItemContainer().getItemIds();
-			List<Object> listObject = new ArrayList<Object>();
+		//SYARAT PEMBATALAN PELUNASAN TUNAI
+		//1. Belum diproses akhir hari/Dalam batas toleransi (HEADERNYA)
+		//2. Sudah dilunaskan seluruhnya
+		//INVOICE DIBAWAH PASTI TIDAK ADA YANG DICICIL artinya 	
+		List<Object> listItemProses = new ArrayList<Object>();		
+		List<Object> listItemProsesUnNormal = new ArrayList<Object>();		
+		
+		Collection itemIds =  model.getTableBeanItemContainer().getItemIds();
+		for (Object itemId: itemIds){
+			Arinvoice itemArinvoice = new Arinvoice();
+			itemArinvoice = model.getTableBeanItemContainer().getItem(itemId).getBean();
 
-			for (Object itemId: itemIds){
-				
-				Arinvoice item = new Arinvoice();
-				item = model.getTableBeanItemContainer().getItem(itemId).getBean();
-
-				if (item.getSelected().getValue()==true && item.isLunas() == false ){
+			if (itemArinvoice.getSelected().getValue()==true && itemArinvoice.isLunas() == true){
+				//1-nota =  1-arPaymentDetail
+				//1. HAPUS NOTA dari ArPaymentDetail
+				List<Arpaymentdetail> listPaymentDetailFromInv = new ArrayList<Arpaymentdetail>(itemArinvoice.getArpaymentDetailInvoices());
+				if (listPaymentDetailFromInv.size()>0){ //Ada Isinya walau cuma satu
+					Arpaymentdetail itemArPaymentDetail = new Arpaymentdetail();
+					itemArPaymentDetail = listPaymentDetailFromInv.get(0);
 					
-					Date tglTransaksiBerjalan = 
-							model.getManagerTransaksi().getCurrentTanggalTransaksiBerjalan(item.getDivisionBean());
-					//UPDATE INVOICE
-					if (item.getTertundacounter() > 0){
-						
-						Calendar cal = Calendar.getInstance();
-						cal.setTime(item.getActualduedate());
-						cal.add(Calendar.DATE, -1 - item.getTerm());
-						
-						if ( item.getActualduedate().getTime() > tglTransaksiBerjalan.getTime()) {						
-
-							item.setActualduedate(cal.getTime());
-							item.setTertundacounter(item.getTertundacounter()-1);
-
-							model.getArInvoiceService().updateObject(item);
-							
-							nomorUrut +=1;
-							//REFRESH SATU PERSATU
-							listObject.add(itemId);
-						}
-						
+					Arpaymentheader itemArPaymentHeader = new Arpaymentheader();					
+//					itemArPaymentHeader = itemArPaymentDetail.getArpaymentheaderBean();					
+					itemArPaymentHeader = model.getArpaymentHeaderService().findAllById(itemArPaymentDetail.getId().getRefno(), 
+							itemArPaymentDetail.getId().getDivision()).get(0);
+					
+					
+					if (itemArPaymentHeader.isClosing() !=true){ //Kalau pake false mungkin null
+						//1. HAPUS arPaymentDetail dari 1-Nota tsb
+						model.getArpaymentDetailService().removeObject(itemArPaymentDetail);
+						//2. Kurangkan Nilai Pembayaran Invoice(AmountPay) dengan Nilai Cash dari ArPaymentDetail(CashAmountPay)
+						//Notes: Ingat lebih bayar dan kurang bayar
+	//					itemArinvoice.setAmountpay(itemArinvoice.getAmountpay() - itemArPaymentDetail.getCashamountpay());
+						itemArinvoice.setAmountpay(0);//Karena Tuani>> 1-Nota = 1 Detail
+						itemArinvoice.setLunas(false);
+						model.getArInvoiceService().updateObject(itemArinvoice);
+						//REFRESH SATU PERSATU >> lebih cepat
+						listItemProses.add(itemId);
 					}
+				}else {
+					//LANGSUNG DI ANGGAP LUNAS>> JIKA TIDAK ADA DETAIL
+					itemArinvoice.setAmountpay(0);//Karena Tuani>> 1-Nota = 1 Detail
+					itemArinvoice.setLunas(false);
+					model.getArInvoiceService().updateObject(itemArinvoice);
+					
+					listItemProsesUnNormal.add(itemId);
 					
 				}
-			
+
 			}
-			//REFRESH FROM
-			view.getBtnSearch().click();
-			
-			if (nomorUrut > 0){
-				Notification.show("Sejumlah " + nomorUrut + " Nota berhasil DIBATALKAN TERTUNDA!");
-			} else {
-				Notification.show("TIDAK ADA FAKTUR TERTUNDA YANG DIBATALKAN");
-				
-			}
-			view.setDisplayFooter();
-			
-		} catch(Exception ex){
-			Notification.show("Error Tertunda!!");		                        		
 			
 		}
+		
+		view.getBtnSearch().click();
+		
+		Notification.show("Sejumlah: " + listItemProses.size() + " Nota berhasil DIBATALKAN!"  +
+				"dan Sejumlah: " + listItemProsesUnNormal.size() + " Nota "
+						+ "tidak mempunyai dokumen pembayaran (Pembatalan Tidak Normal)");
+		
+		view.setDisplayFooter();
 	}
 	
 	public int reloadForm(){		
@@ -546,11 +619,11 @@ public class PenandaanTTDPresenter implements ClickListener, ValueChangeListener
 			} else {
 				model.getTableBeanItemContainer().getItem(itemId).getBean().getSelected().setValue(true);				
 			}
-			//JIKA LUNAS TIDAK BOLEH DI CHECK
-			if (model.getItem().isLunas()==true){
-				Notification.show("FAKTUR " + item.getId() + " SUDAH LUNAS!!");
-				model.getTableBeanItemContainer().getItem(itemId).getBean().getSelected().setValue(false);				
-			}
+			//JIKA LUNAS TIDAK BOLEH DI CHECK >> Karena ada pembatalan lunas maka boleh saja faktur di klik
+//			if (model.getItem().isLunas()==true){
+//				Notification.show("FAKTUR " + item.getId() + " SUDAH LUNAS!!");
+//				model.getTableBeanItemContainer().getItem(itemId).getEntity().getSelected().setValue(false);				
+//			}
 			
 			view.setDisplayFooter();
 			
@@ -561,11 +634,6 @@ public class PenandaanTTDPresenter implements ClickListener, ValueChangeListener
 		
 	}
 	
-	@Override
-	public void itemClick(ItemClickEvent event) {
-		// TODO Auto-generated method stub
-		
-	}
 
 	private static final ShortcutAction ENTER = new ShortcutAction("Enter",
 			KeyCode.ENTER, null);
@@ -689,6 +757,7 @@ public class PenandaanTTDPresenter implements ClickListener, ValueChangeListener
 		
 		view.getFieldSearchByRekap().setValue(recapCollection);
 	}
+	
 	
 	
 }
